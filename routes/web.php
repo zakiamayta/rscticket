@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TicketController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,5 +14,4 @@ Route::post('/tiket', [TicketController::class, 'store'])->name('ticket.store');
 Route::get('/tiket/{id}/pembayaran', [TicketController::class, 'payment'])->name('ticket.payment');
 
 
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
