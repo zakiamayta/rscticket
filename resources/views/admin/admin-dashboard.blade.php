@@ -19,7 +19,13 @@
             </div>
             <h1 class="text-xl font-semibold text-gray-800">Admin Dashboard</h1>
         </div>
-        <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">Logout</a>
+        <form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">
+        Logout
+    </button>
+</form>
+
     </header>
 
     
