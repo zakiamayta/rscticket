@@ -6,12 +6,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
-// web.php
-Route::get('/tiket', [TicketController::class, 'create'])->name('ticket.create');
+// Form tiket
 Route::post('/tiket', [TicketController::class, 'store'])->name('ticket.store');
+Route::get('/tiket', [TicketController::class, 'create'])->name('ticket.create');
+
+// Halaman pembayaran
 Route::get('/tiket/{id}/pembayaran', [TicketController::class, 'payment'])->name('ticket.payment');
 
 

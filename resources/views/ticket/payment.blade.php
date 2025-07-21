@@ -1,48 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Halaman Pembayaran</title>
-    <style>
-        body { font-family: Arial; margin: 40px; }
-        .status { margin-bottom: 20px; }
-        .ticket-list { margin-top: 20px; }
-        ul { list-style: none; padding: 0; }
-        li { background: #f0f0f0; margin-bottom: 10px; padding: 10px; border-radius: 5px; }
-        .qris-placeholder { margin-top: 40px; font-style: italic; color: gray; }
-    </style>
-</head>
-<body>
+@extends('layouts.app')
 
-    <h2>Detail Pembayaran</h2>
+@section('title', 'Detail Pembayaran')
 
-    <div class="status">
-        <p><strong>Email:</strong> {{ $transaction->email ?? 'Tidak tersedia' }}</p>
-        <p><strong>Status Pembayaran:</strong> {{ $transaction->payment_status ?? 'Belum diketahui' }}</p>
-        <p><strong>Waktu Checkout:</strong> {{ $transaction->checkout_time ?? '-' }}</p>
+@section('content')
+<div class="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-50 text-gray-800">
+  <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-3xl">
+
+    <h2 class="text-2xl md:text-3xl font-extrabold text-center text-blue-700 mb-8">Detail Pembayaran</h2>
+
+    <!-- Status Pembayaran -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 mb-6">
+      <div><span class="font-semibold">📧 Email:</span> {{ $transaction->email ?? 'Tidak tersedia' }}</div>
+      <div><span class="font-semibold">💳 Status Pembayaran:</span> {{ $transaction->payment_status ?? 'Belum diketahui' }}</div>
+      <div><span class="font-semibold">🕒 Waktu Checkout:</span> {{ $transaction->checkout_time ?? '-' }}</div>
     </div>
 
-    <div class="ticket-list">
-        <h3>Daftar Tiket</h3>
-        <ul>
-            @forelse($details as $d)
-                <li>
-                    <strong>{{ $d->name ?? 'Tanpa Nama' }}</strong> <br>
-                    NIK: {{ $d->nik ?? '-' }} <br>
-                    No. Telepon: {{ $d->phone_number ?? 'Tidak ada nomor' }}
-                </li>
-            @empty
-                <li>Tidak ada data tiket ditemukan.</li>
-            @endforelse
-        </ul>
-        <h3>Harga Tiket</h3>
-        <p>Harga per Tiket: Rp{{ number_format($hargaTiket, 0, ',', '.') }}</p>
-        <p>Jumlah Tiket: {{ count($details) }}</p>
-        <p><strong>Total yang Harus Dibayar: Rp{{ number_format($totalBayar, 0, ',', '.') }}</strong></p>
-
+    <!-- Daftar Tiket -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-gray-800 mb-4">👥 Daftar Tiket</h3>
+      @forelse($details as $d)
+        <div class="bg-gray-100 rounded-lg p-4 shadow-sm mb-3">
+          <p class="font-semibold text-gray-900">{{ $d->name ?? 'Tanpa Nama' }}</p>
+          <p class="text-sm text-gray-700">NIK: {{ $d->nik ?? '-' }}</p>
+          <p class="text-sm text-gray-700">No. Telepon: {{ $d->phone_number ?? 'Tidak ada nomor' }}</p>
+        </div>
+      @empty
+        <p class="text-gray-500 italic">Tidak ada data tiket ditemukan.</p>
+      @endforelse
     </div>
 
-    <hr>
-    <p class="qris-placeholder"><strong>QRIS dan detail pembayaran Tripay akan muncul di sini nanti.</strong></p>
+    <!-- Harga -->
+    <div class="text-sm mb-8">
+      <h3 class="text-xl font-semibold text-gray-800 mb-4">💰 Informasi Pembayaran</h3>
+      <p>🎟️ Harga per Tiket: <strong>Rp{{ number_format($hargaTiket, 0, ',', '.') }}</strong></p>
+      <p>👤 Jumlah Tiket: <strong>{{ count($details) }}</strong></p>
+      <p class="text-blue-700 font-bold text-lg mt-2">Total Bayar: Rp{{ number_format($totalBayar, 0, ',', '.') }}</p>
+    </div>
 
-</body>
-</html>
+    <!-- QRIS Placeholder -->
+    <div class="text-center bg-gray-100 p-6 rounded-xl shadow-inner text-gray-600 italic">
+      <p><strong>QRIS dan detail pembayaran Tripay akan muncul di sini nanti.</strong></p>
+    </div>
+
+  </div>
+</div>
+@endsection
