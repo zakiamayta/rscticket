@@ -4,79 +4,148 @@
 
 @section('content')
 <div class="container py-5">
+  <!-- Logo & Judul -->
   <div class="text-center mb-4">
     <img src="{{ asset('logo.png') }}" alt="Logo Perusahaan" class="mx-auto mb-2" style="max-height: 100px;">
     <h1 class="h5 fw-bold">RSC E-Ticket</h1>
   </div>
 
-  <div class="mx-auto bg-white p-5 rounded shadow-sm" style="max-width: 700px;">
-    <h2 class="h5 fw-semibold mb-4">Form Pembelian Tiket</h2>
+  <!-- Detail Event -->
+  <div class="text-center mb-5">
+    <h2 class="h4 fw-bold">Negative Mental Attitude</h2>
+    <p class="text-muted mb-1">📍 Kediri</p>
+    <p class="text-muted mb-0">🗓️ Oktober 2025</p>
+  </div>
 
-    {{-- Notifikasi Error --}}
-    @if(session('error'))
-      <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
-    @if($errors->any())
-      <div class="alert alert-danger">
-        <ul class="mb-0 ps-3">
-          @foreach($errors->all() as $err)
-            <li>{{ $err }}</li>
-          @endforeach
-        </ul>
-      </div>
-    @endif
-
-    {{-- Form --}}
-    <form action="{{ route('ticket.store') }}" method="POST">
-      @csrf
-
-      <!-- Email -->
+  <!-- Grid: Form & Ringkasan -->
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <!-- Qty Selector -->
       <div class="mb-4">
-        <label class="form-label">Email Pembeli:</label>
-        <input type="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="contoh: nama@email.com" />
+        <label class="form-label fw-semibold">Jumlah Tiket:</label>
+        <div class="d-flex align-items-center">
+          <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="updateQty(-1)">-</button>
+          <input type="number" id="ticketQty" value="1" min="1" class="form-control w-auto text-center" style="width: 60px;" readonly>
+          <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="updateQty(1)">+</button>
+        </div>
       </div>
 
-      <!-- Dynamic Pengunjung -->
-      <div id="pengunjung-list"></div>
+      <!-- Form -->
+      <div class="bg-white p-4 rounded shadow-sm">
+        <h2 class="h6 fw-bold mb-3">Form Pembelian Tiket</h2>
 
-      <!-- Tambah Pengunjung -->
-      <div class="mb-3">
-        <button type="button" onclick="addPengunjung()" class="btn btn-outline-success btn-sm">+ Tambah Pengunjung</button>
-      </div>
+        @if(session('error'))
+          <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
-      <!-- Submit -->
-      <div class="mt-4">
-        <button type="submit" class="btn btn-primary w-100">Lanjut ke Pembayaran</button>
+        @if($errors->any())
+          <div class="alert alert-danger">
+            <ul class="mb-0 ps-3">
+              @foreach($errors->all() as $err)
+                <li>{{ $err }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
+        <form action="{{ route('ticket.store') }}" method="POST">
+          @csrf
+
+          <!-- Email -->
+          <div class="mb-4">
+            <label class="form-label">Email Pembeli:</label>
+            <input type="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="contoh: nama@email.com" />
+          </div>
+
+          <!-- Dynamic Pengunjung -->
+          <div id="pengunjung-list"></div>
+
+          <!-- Submit -->
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary w-100">Lanjut ke Pembayaran</button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-lg-4 mt-4 mt-lg-0">
+      <div class="bg-light p-4 rounded shadow-sm">
+        <h5 class="fw-bold mb-3">Ringkasan Pesanan</h5>
+        <p class="mb-1">Harga Tiket: <span class="float-end">Rp <span id="ticket-price">50000</span></span></p>
+        <p class="mb-1">Jumlah Tiket: <span class="float-end" id="ticket-count">1</span></p>
+        <hr>
+        <p class="fw-semibold">Total: <span class="float-end">Rp <span id="total-price">50000</span></span></p>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
+  const ticketPrice = 50000;
+
+  function updateQty(change) {
+    const qtyInput = document.getElementById('ticketQty');
+    let qty = parseInt(qtyInput.value) || 1;
+    qty += change;
+    if (qty < 1) qty = 1;
+    qtyInput.value = qty;
+    updateSummary();
+    updateFormFields(qty);
+  }
+
+  function updateSummary() {
+    const qty = parseInt(document.getElementById('ticketQty').value) || 1;
+    document.getElementById('ticket-count').innerText = qty;
+    document.getElementById('total-price').innerText = (ticketPrice * qty).toLocaleString();
+  }
+
+  function updateFormFields(qty) {
+    const wrapper = document.getElementById('pengunjung-list');
+    wrapper.innerHTML = '';
+    for (let i = 0; i < qty; i++) {
+      addPengunjung();
+    }
+  }
+
   function addPengunjung(nik = '', name = '', phone = '') {
     const wrapper = document.getElementById('pengunjung-list');
+    const count = wrapper.querySelectorAll('.pengunjung').length + 1;
+
     const div = document.createElement('div');
-    div.className = 'pengunjung bg-white p-4 rounded-lg shadow-sm border mb-4';
+    div.className = 'pengunjung bg-white p-3 rounded border mb-3';
     div.innerHTML = `
-      <div class="mb-3">
+      <h6 class="fw-bold mb-3">Pengunjung ${count}</h6>
+      <div class="mb-2">
         <label class="form-label">NIK:</label>
-        <input type="text" name="nik[]" value="${nik}" required class="form-control" placeholder="Nomor Induk Kependudukan (16 digit)" />
+        <input type="text" name="nik[]" value="${nik}" required class="form-control" />
       </div>
-      <div class="mb-3">
+      <div class="mb-2">
         <label class="form-label">Nama Lengkap:</label>
-        <input type="text" name="name[]" value="${name}" required class="form-control" placeholder="Nama sesuai KTP/pengunjung" />
+        <input type="text" name="name[]" value="${name}" required class="form-control" />
       </div>
-      <div class="mb-3">
-        <label class="form-label">No. Telepon (boleh kosong):</label>
-        <input type="text" name="phone[]" value="${phone}" class="form-control" placeholder="Contoh: 081234567890" />
+      <div class="mb-2">
+        <label class="form-label">No. Telepon:</label>
+        <input type="text" name="phone[]" value="${phone}" class="form-control" required />
       </div>
-      <button type="button" class="btn btn-link text-danger p-0" onclick="this.parentElement.remove()">Hapus Pengunjung</button>
+      <button type="button" class="btn btn-link text-danger p-0" onclick="this.parentElement.remove(); updateAfterRemove()">Hapus Pengunjung</button>
     `;
     wrapper.appendChild(div);
   }
 
-  // Auto-tambah satu pengunjung saat pertama kali
+
+  function updateAfterRemove() {
+    const forms = document.querySelectorAll('#pengunjung-list .pengunjung');
+    document.getElementById('ticketQty').value = forms.length;
+    forms.forEach((el, i) => {
+      const title = el.querySelector('h6');
+      if (title) title.textContent = `Pengunjung ${i + 1}`;
+    });
+    updateSummary();
+  }
+
+
+  // Initial setup
   window.addEventListener('DOMContentLoaded', () => {
     @if(old('nik'))
       @foreach(old('nik') as $i => $nik)
@@ -87,8 +156,9 @@
         );
       @endforeach
     @else
-      addPengunjung();
+      updateFormFields(1); // default 1
     @endif
+    updateSummary();
   });
 </script>
 @endsection
