@@ -1,96 +1,94 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Pembelian Tiket Konser</title>
-    <style>
-        body { font-family: Arial; margin: 40px; }
-        .pengunjung { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-        .pengunjung input { display: block; margin-bottom: 5px; width: 100%; padding: 6px; }
-        .remove-btn { background: red; color: white; border: none; padding: 4px 8px; cursor: pointer; margin-top: 5px; }
-        .add-btn { background: green; color: white; padding: 8px 12px; cursor: pointer; border: none; }
-        .submit-btn { background: blue; color: white; padding: 10px 15px; cursor: pointer; margin-top: 20px; }
-        .error-msg { color: red; margin-bottom: 10px; }
-    </style>
-    <script>
-        function addPengunjung(nik = '', name = '', phone = '') {
-            const wrapper = document.getElementById('pengunjung-list');
+@extends('layouts.app')
 
-            const div = document.createElement('div');
-            div.className = 'pengunjung';
-            div.innerHTML = `
-                <label>NIK:</label>
-                <input type="text" name="nik[]" value="${nik}" required>
+@section('title', 'Pembelian Tiket Konser')
 
-                <label>Nama Lengkap:</label>
-                <input type="text" name="name[]" value="${name}" required>
+@section('content')
+<div class="container py-5">
+  <div class="text-center mb-4">
+    <img src="{{ asset('logo.png') }}" alt="Logo Perusahaan" class="mx-auto mb-2" style="max-height: 100px;">
+    <h1 class="h5 fw-bold">RSC E-Ticket</h1>
+  </div>
 
-                <label>No. Telepon (boleh kosong):</label>
-                <input type="text" name="phone[]" value="${phone}">
+  <div class="mx-auto bg-white p-5 rounded shadow-sm" style="max-width: 700px;">
+    <h2 class="h5 fw-semibold mb-4">Form Pembelian Tiket</h2>
 
-                <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Hapus Pengunjung</button>
-            `;
-            wrapper.appendChild(div);
-        }
-    </script>
-</head>
-<body>
-
-    <h2>Pembelian Tiket Konser</h2>
-
-    {{-- Error Message --}}
+    {{-- Notifikasi Error --}}
     @if(session('error'))
-        <div class="error-msg">{{ session('error') }}</div>
+      <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
     @if($errors->any())
-        <div class="error-msg">
-            <ul>
-                @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-        </div>
+      <div class="alert alert-danger">
+        <ul class="mb-0 ps-3">
+          @foreach($errors->all() as $err)
+            <li>{{ $err }}</li>
+          @endforeach
+        </ul>
+      </div>
     @endif
 
+    {{-- Form --}}
     <form action="{{ route('ticket.store') }}" method="POST">
-        @csrf
+      @csrf
 
-        <label>Email Pembeli:</label>
-        <input type="email" name="email" required value="{{ old('email') }}"><br><br>
+      <!-- Email -->
+      <div class="mb-4">
+        <label class="form-label">Email Pembeli:</label>
+        <input type="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="contoh: nama@email.com" />
+      </div>
 
-        <div id="pengunjung-list">
-            @if(old('nik'))
-                @foreach(old('nik') as $i => $nik)
-                    <script>
-                        window.addEventListener('DOMContentLoaded', () => {
-                            addPengunjung(
-                                @json(old('nik')[$i] ?? ''),
-                                @json(old('name')[$i] ?? ''),
-                                @json(old('phone')[$i] ?? '')
-                            );
-                        });
-                    </script>
-                @endforeach
-            @else
-                <div class="pengunjung">
-                    <label>NIK:</label>
-                    <input type="text" name="nik[]" required>
+      <!-- Dynamic Pengunjung -->
+      <div id="pengunjung-list"></div>
 
-                    <label>Nama Lengkap:</label>
-                    <input type="text" name="name[]" required>
+      <!-- Tambah Pengunjung -->
+      <div class="mb-3">
+        <button type="button" onclick="addPengunjung()" class="btn btn-outline-success btn-sm">+ Tambah Pengunjung</button>
+      </div>
 
-                    <label>No. Telepon (boleh kosong):</label>
-                    <input type="text" name="phone[]">
-
-                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Hapus Pengunjung</button>
-                </div>
-            @endif
-        </div>
-
-        <button type="button" class="add-btn" onclick="addPengunjung()">+ Tambah Pengunjung</button><br><br>
-
-        <button type="submit" class="submit-btn">Lanjut ke Pembayaran</button>
+      <!-- Submit -->
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary w-100">Lanjut ke Pembayaran</button>
+      </div>
     </form>
+  </div>
+</div>
 
-</body>
-</html>
+<script>
+  function addPengunjung(nik = '', name = '', phone = '') {
+    const wrapper = document.getElementById('pengunjung-list');
+    const div = document.createElement('div');
+    div.className = 'pengunjung bg-white p-4 rounded-lg shadow-sm border mb-4';
+    div.innerHTML = `
+      <div class="mb-3">
+        <label class="form-label">NIK:</label>
+        <input type="text" name="nik[]" value="${nik}" required class="form-control" placeholder="Nomor Induk Kependudukan (16 digit)" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nama Lengkap:</label>
+        <input type="text" name="name[]" value="${name}" required class="form-control" placeholder="Nama sesuai KTP/pengunjung" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">No. Telepon (boleh kosong):</label>
+        <input type="text" name="phone[]" value="${phone}" class="form-control" placeholder="Contoh: 081234567890" />
+      </div>
+      <button type="button" class="btn btn-link text-danger p-0" onclick="this.parentElement.remove()">Hapus Pengunjung</button>
+    `;
+    wrapper.appendChild(div);
+  }
+
+  // Auto-tambah satu pengunjung saat pertama kali
+  window.addEventListener('DOMContentLoaded', () => {
+    @if(old('nik'))
+      @foreach(old('nik') as $i => $nik)
+        addPengunjung(
+          @json(old('nik')[$i] ?? ''),
+          @json(old('name')[$i] ?? ''),
+          @json(old('phone')[$i] ?? '')
+        );
+      @endforeach
+    @else
+      addPengunjung();
+    @endif
+  });
+</script>
+@endsection
