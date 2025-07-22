@@ -102,11 +102,22 @@
 
   function updateFormFields(qty) {
     const wrapper = document.getElementById('pengunjung-list');
-    wrapper.innerHTML = '';
+    const currentData = [];
+    wrapper.querySelectorAll('.pengunjung').forEach((el) => {
+      currentData.push({
+        nik: el.querySelector('input[name="nik[]"]').value,
+        name: el.querySelector('input[name="name[]"]').value,
+        phone: el.querySelector('input[name="phone[]"]').value
+      });
+    });
+
+    wrapper.innerHTML = ''; 
     for (let i = 0; i < qty; i++) {
-      addPengunjung();
+      const data = currentData[i] || { nik: '', name: '', phone: '' };
+      addPengunjung(data.nik, data.name, data.phone);
     }
   }
+
 
   function addPengunjung(nik = '', name = '', phone = '') {
     const wrapper = document.getElementById('pengunjung-list');
@@ -156,7 +167,7 @@
         );
       @endforeach
     @else
-      updateFormFields(1); // default 1
+      updateFormFields(1); 
     @endif
     updateSummary();
   });
