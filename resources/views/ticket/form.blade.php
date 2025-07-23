@@ -6,13 +6,17 @@
 <div class="container py-5">
   <!-- Logo & Judul -->
   <div class="text-center mb-4">
-    <img src="{{ asset('logo.png') }}" alt="Logo Perusahaan" class="mx-auto mb-2" style="max-height: 100px;">
-    <h1 class="h5 fw-bold">RSC E-Ticket</h1>
+    <img src="{{ asset('logo.png') }}" alt="Logo Perusahaan" class="mx-auto mb-3" style="max-height: 90px;">
+    <h1 class="h5 fw-bold text-orange-600">RSC E-Ticket</h1>
+    <a href="{{ url('/') }}" class="btn btn-sm btn-outline-secondary mt-2">← Kembali ke Beranda</a>
   </div>
-
+  <!-- Poster Event -->
+  <div class="text-center mb-5">
+    <img src="{{ asset('poster.jpeg') }}" alt="Poster Konser" class="rounded-lg shadow w-100" style="max-height: 400px; object-fit: cover;">
+  </div>
   <!-- Detail Event -->
   <div class="text-center mb-5">
-    <h2 class="h4 fw-bold">Negative Mental Attitude</h2>
+    <h2 class="h4 fw-bold">Konser: Negative Mental Attitude</h2>
     <p class="text-muted mb-1">📍 Kediri</p>
     <p class="text-muted mb-0">🗓️ Oktober 2025</p>
   </div>
@@ -25,14 +29,14 @@
         <label class="form-label fw-semibold">Jumlah Tiket:</label>
         <div class="d-flex align-items-center">
           <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="updateQty(-1)">-</button>
-          <input type="number" id="ticketQty" value="1" min="1" class="form-control w-auto text-center" style="width: 60px;" readonly>
+          <input type="number" id="ticketQty" value="1" min="1" class="form-control text-center" style="width: 60px;" readonly>
           <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="updateQty(1)">+</button>
         </div>
       </div>
 
       <!-- Form -->
-      <div class="bg-white p-4 rounded shadow-sm">
-        <h2 class="h6 fw-bold mb-3">Form Pembelian Tiket</h2>
+      <div class="bg-white p-4 rounded shadow-sm border">
+        <h2 class="h5 fw-bold text-orange-600 mb-3">Form Pembelian Tiket</h2>
 
         @if(session('error'))
           <div class="alert alert-danger">{{ session('error') }}</div>
@@ -62,7 +66,9 @@
 
           <!-- Submit -->
           <div class="mt-4">
-            <button type="submit" class="btn btn-primary w-100">Lanjut ke Pembayaran</button>
+            <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #ea580c;">
+              Lanjut ke Pembayaran
+            </button>
           </div>
         </form>
       </div>
@@ -70,8 +76,8 @@
 
     <!-- Order Summary -->
     <div class="col-lg-4 mt-4 mt-lg-0">
-      <div class="bg-light p-4 rounded shadow-sm">
-        <h5 class="fw-bold mb-3">Ringkasan Pesanan</h5>
+      <div class="bg-light p-4 rounded shadow-sm border">
+        <h5 class="fw-bold text-orange-600 mb-3">Ringkasan Pesanan</h5>
         <p class="mb-1">Harga Tiket: <span class="float-end">Rp <span id="ticket-price">50000</span></span></p>
         <p class="mb-1">Jumlah Tiket: <span class="float-end" id="ticket-count">1</span></p>
         <hr>
@@ -118,7 +124,6 @@
     }
   }
 
-
   function addPengunjung(nik = '', name = '', phone = '') {
     const wrapper = document.getElementById('pengunjung-list');
     const count = wrapper.querySelectorAll('.pengunjung').length + 1;
@@ -126,35 +131,33 @@
     const div = document.createElement('div');
     div.className = 'pengunjung bg-white p-3 rounded border mb-3';
     div.innerHTML = `
-      <h6 class="fw-bold mb-3">Pengunjung ${count}</h6>
+      <h6 class="fw-bold text-orange-600 mb-3">Data Pengunjung ${count}</h6>
       <div class="mb-2">
         <label class="form-label">NIK:</label>
-        <input type="text" name="nik[]" value="${nik}" required class="form-control" />
+        <input type="text" name="nik[]" value="${nik}" required class="form-control" placeholder="Nomor Induk Kependudukan" />
       </div>
       <div class="mb-2">
         <label class="form-label">Nama Lengkap:</label>
-        <input type="text" name="name[]" value="${name}" required class="form-control" />
+        <input type="text" name="name[]" value="${name}" required class="form-control" placeholder="Nama sesuai KTP" />
       </div>
       <div class="mb-2">
         <label class="form-label">No. Telepon:</label>
-        <input type="text" name="phone[]" value="${phone}" class="form-control" required />
+        <input type="text" name="phone[]" value="${phone}" class="form-control" required placeholder="08xxxxxxxxxx" />
       </div>
-      <button type="button" class="btn btn-link text-danger p-0" onclick="this.parentElement.remove(); updateAfterRemove()">Hapus Pengunjung</button>
+      <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.parentElement.remove(); updateAfterRemove()">Hapus Pengunjung</button>
     `;
     wrapper.appendChild(div);
   }
-
 
   function updateAfterRemove() {
     const forms = document.querySelectorAll('#pengunjung-list .pengunjung');
     document.getElementById('ticketQty').value = forms.length;
     forms.forEach((el, i) => {
       const title = el.querySelector('h6');
-      if (title) title.textContent = `Pengunjung ${i + 1}`;
+      if (title) title.textContent = `Data Pengunjung ${i + 1}`;
     });
     updateSummary();
   }
-
 
   // Initial setup
   window.addEventListener('DOMContentLoaded', () => {
