@@ -8,6 +8,9 @@ use App\Http\Controllers\LoginController;
 Route::get('/', function () {
     return view('home');
 });
+Route::get('/cara-memesan', function () {
+    return view('cara-memesan');
+});
 
 // Form tiket
 Route::post('/tiket', [TicketController::class, 'store'])->name('ticket.store');
@@ -28,3 +31,5 @@ Route::middleware('auth')->group(function () {
 
 
 });
+
+
