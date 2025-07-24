@@ -54,6 +54,13 @@ public function getAllTransactionData(Request $request)
     return $transactions;
 }
 
+public function exportPDF(Request $request)
+{
+    $transactions = $this->getAllTransactionData($request);
+    $pdf = Pdf::loadView('admin.export-pdf', compact('transactions'));
+    return $pdf->download('transactions.pdf');
+}
+
 public function exportSimpleExcel(Request $request): StreamedResponse
 {
     $transactions = $this->getAllTransactionData($request);
