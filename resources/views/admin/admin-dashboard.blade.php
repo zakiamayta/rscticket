@@ -59,8 +59,7 @@
   <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 rounded bg-gray-200">Reset</a>
 
   <div class="flex gap-4 mb-4">
-    <a href="{{ route('admin.dashboard.export.excel', request()->query()) }}"
-       class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm">Export Excel</a>
+    <a href="{{ route('admin.dashboard.export.excel', request()->query()) }}" class="bg-green-600 text-white px-4 py-2 rounded">Export Excel (XLSX)</a>
 
     <a href="{{ route('admin.dashboard.export.pdf', request()->query()) }}"
        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition text-sm" target="_blank">Export PDF</a>

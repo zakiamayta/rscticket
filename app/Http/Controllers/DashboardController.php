@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Facades\Excel;
+use Spatie\SimpleExcel\SimpleExcelWriter;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Exports\TransactionExport;
 
 class DashboardController extends Controller
@@ -53,19 +54,29 @@ public function getAllTransactionData(Request $request)
     return $transactions;
 }
 
-public function exportExcel(Request $request)
+public function exportSimpleExcel(Request $request): StreamedResponse
 {
     $transactions = $this->getAllTransactionData($request);
-    return Excel::download(new TransactionExport($transactions), 'transactions.xlsx');
+
+    return response()->streamDownload(function () use ($transactions) {
+        $writer = SimpleExcelWriter::streamDownload('transactions.xlsx');
+
+        foreach ($transactions as $transaction) {
+            foreach ($transaction->details as $detail) {
+                $writer->addRow([
+                    'Email'           => $transaction->email,
+                    'Name'            => $detail->name,
+                    'Phone Number'    => $detail->phone_number,
+                    'Checkout Time'   => $transaction->checkout_time,
+                    'Paid Time'       => $transaction->paid_time ?? '-',
+                    'Payment Status'  => $transaction->payment_status,
+                    'Total Amount'    => $transaction->total_amount,
+                ]);
+            }
+        }
+
+        $writer->close();
+    }, 'transactions.xlsx');
 }
-
-public function exportPDF(Request $request)
-{
-    $transactions = $this->getAllTransactionData($request);
-    $pdf = Pdf::loadView('admin.export-pdf', compact('transactions'));
-    return $pdf->download('transactions.pdf');
-}
-
-
     
 }
