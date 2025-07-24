@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\WebhookController;
+
+Route::post('/webhook/qris/callback', [WebhookController::class, 'handleCallback'])->name('webhook.qris.callback');
 
 Route::get('/', function () {
     return view('home');
@@ -24,6 +27,10 @@ Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('adm
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+
+
+Route::get('/admin/dashboard/export-excel', [DashboardController::class, 'exportExcel'])->name('admin.dashboard.export.excel');
+Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportPDF'])->name('admin.dashboard.export.pdf');
 
 Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');

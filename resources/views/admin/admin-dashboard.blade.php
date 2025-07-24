@@ -34,7 +34,11 @@
     <main class="px-10 py-6">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Transaction List</h2>
 
-                  <form method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap gap-4 mb-6">
+<form method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap gap-4 mb-6">
+
+  <input type="date" name="start_date" class="form-input w-48 border p-2 rounded" value="{{ request('start_date') }}">
+  <input type="date" name="end_date" class="form-input w-48 border p-2 rounded" value="{{ request('end_date') }}">
+
   <select name="payment_status" class="form-input w-48 border p-2 rounded">
     <option value="">-- Semua Status --</option>
     <option value="paid" @if(request('payment_status') === 'paid') selected @endif>Paid</option>
@@ -46,13 +50,25 @@
     <option value="email" @if(request('sort_by') === 'email') selected @endif>Email</option>
     <option value="name" @if(request('sort_by') === 'name') selected @endif>Name</option>
     <option value="payment_status" @if(request('sort_by') === 'payment_status') selected @endif>Status</option>
+    <option value="checkout_time" @if(request('sort_by') === 'checkout_time') selected @endif>Checkout Time</option>
   </select>
 
   <input type="text" name="q" placeholder="Cari email/nama" class="form-input w-64 border p-2 rounded" value="{{ request('q') }}"/>
 
   <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Filter</button>
   <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 rounded bg-gray-200">Reset</a>
+
+  <div class="flex gap-4 mb-4">
+    <a href="{{ route('admin.dashboard.export.excel', request()->query()) }}"
+       class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm">Export Excel</a>
+
+    <a href="{{ route('admin.dashboard.export.pdf', request()->query()) }}"
+       class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition text-sm" target="_blank">Export PDF</a>
+</div>
+
+
 </form>
+
         <div class="bg-white border rounded-xl shadow overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50 text-left text-gray-600 font-semibold">

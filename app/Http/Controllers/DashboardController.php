@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TransactionExport;
 
 class DashboardController extends Controller
 {
@@ -13,35 +16,56 @@ class DashboardController extends Controller
         return view('admin.admin-dashboard', compact('transactions'));
     }
 
-    public function getAllTransactionData(Request $request)
-    {
-        $sortBy = $request->input('sort_by');
-        $allowedSorts = ['email', 'payment_status']; // hanya dari tabel utama
+public function getAllTransactionData(Request $request)
+{
+    $sortBy = $request->input('sort_by');
+    $allowedSorts = ['email', 'payment_status', 'checkout_time'];
 
-        $transactions = Transaction::with('details')
-            ->when($request->payment_status, fn($q) =>
-                $q->where('payment_status', $request->payment_status)
-            )
-            ->when($request->q, function ($q) use ($request) {
-                $q->where(function ($query) use ($request) {
-                    $query->where('email', 'like', '%' . $request->q . '%')
-                          ->orWhereHas('details', fn($q2) =>
-                              $q2->where('name', 'like', '%' . $request->q . '%')
-                          );
-                });
-            })
-            ->when($sortBy && in_array($sortBy, $allowedSorts), fn($q) =>
-                $q->orderBy($sortBy)
-            )
-            ->get();
+    $transactions = Transaction::with('details')
+        ->when($request->payment_status, fn($q) =>
+            $q->where('payment_status', $request->payment_status)
+        )
+        ->when($request->q, function ($q) use ($request) {
+            $q->where(function ($query) use ($request) {
+                $query->where('email', 'like', '%' . $request->q . '%')
+                      ->orWhereHas('details', fn($q2) =>
+                          $q2->where('name', 'like', '%' . $request->q . '%')
+                      );
+            });
+        })
+        ->when($request->start_date && $request->end_date, function ($q) use ($request) {
+            $q->whereBetween('checkout_time', [
+                $request->start_date . ' 00:00:00',
+                $request->end_date . ' 23:59:59'
+            ]);
+        })
+        ->when($sortBy && in_array($sortBy, $allowedSorts), fn($q) =>
+            $q->orderBy($sortBy, 'asc')
+        )
+        ->get();
 
-        // Sort by name manually (karena name ada di relasi)
-        if ($sortBy === 'name') {
-            $transactions = $transactions->sortBy(function ($transaction) {
-                return optional($transaction->details->first())->name;
-            })->values(); // reindex
-        }
-
-        return $transactions;
+    if ($sortBy === 'name') {
+        $transactions = $transactions->sortBy(function ($transaction) {
+            return optional($transaction->details->first())->name;
+        })->values();
     }
+
+    return $transactions;
+}
+
+public function exportExcel(Request $request)
+{
+    $transactions = $this->getAllTransactionData($request);
+    return Excel::download(new TransactionExport($transactions), 'transactions.xlsx');
+}
+
+public function exportPDF(Request $request)
+{
+    $transactions = $this->getAllTransactionData($request);
+    $pdf = Pdf::loadView('admin.export-pdf', compact('transactions'));
+    return $pdf->download('transactions.pdf');
+}
+
+
+    
 }
