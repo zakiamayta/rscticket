@@ -1,172 +1,299 @@
 @extends('layouts.app')
 
-@section('title', 'Pembelian Tiket Konser')
+@section('title', 'Pembelian Tiket')
 
 @section('content')
-<div class="container py-4">
+<div class="container py-5">
+  <div class="row">
+    <!-- Kategori Tiket + Poster -->
+    <div class="col-lg-5 mb-4">
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-white fw-semibold fs-5">Kategori Tiket</div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+            <div>
+              <div class="fw-bold">Early Bird</div>
+              <div class="text-muted">Rp 50.000</div>
+            </div>
+            <div id="ticket-control"></div>
+          </div>
+        </div>
+      </div>
 
-  <!-- Tombol Kembali -->
-  <div class="mb-3">
-    <a href="{{ url('/') }}" class="btn btn-sm btn-outline-secondary">← Kembali ke Home</a>
-  </div>
+      <!-- Poster -->
+      <div class="card shadow-sm border-0">
+        <img src="{{ asset('poster2.jpg') }}" class="card-img-top" style="max-height: 250px; object-fit: cover;" alt="Poster">
+        <div class="card-body">
+          <h4 class="card-title fw-bold mb-2">Negative Mental Attitude</h4>
+          <p class="card-text text-muted">📍 Kediri — 🗓️ 19 Oktober 2025</p>
+          <p class="card-text">Sebuah konser musik dengan semangat hardcore punk untuk menyuarakan suara hati pemuda.</p>
+        </div>
+      </div>
+    </div>
 
-  <!-- Poster Event -->
-  <div class="text-center mb-4">
-    <img src="{{ asset('poster2.jpg') }}" alt="Poster Konser" class="rounded-lg shadow w-100" style="max-height: 450px; object-fit: cover;">
-  </div>
-
-  <!-- Detail Event -->
-  <div class="mb-5">
-    <h1 class="fw-bold" style="font-size: 2rem;">Konser: Negative Mental Attitude</h1>
-    <p class="text-muted mb-1">📍 Kediri</p>
-    <p class="text-muted mb-0">🗓️ Oktober 2025</p>
-  </div>
-
-  <!-- Grid: Form & Ringkasan -->
-  <div class="row justify-content-center">
+    <!-- Detail & Form -->
     <div class="col-lg-7">
-      <!-- Qty Selector -->
-      <div class="mb-4">
-        <label class="form-label fw-semibold">Jumlah Tiket:</label>
-        <div class="d-flex align-items-center">
-          <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="updateQty(-1)">-</button>
-          <input type="number" id="ticketQty" value="1" min="1" class="form-control text-center" style="width: 60px;" readonly>
-          <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="updateQty(1)">+</button>
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-white fw-semibold fs-5">Detail Pesanan</div>
+        <div class="card-body">
+          <p class="mb-2"><span id="ticket-count">0</span> Tiket Dipesan</p>
+          <p class="fw-bold">Total <span class="float-end">Rp <span id="total-price">0</span></span></p>
+          <p class="fw-bold">Admin Fee <span class="float-end">Rp 2.500</span></p>
+          <p class="fw-bold border-top pt-2">Total Bayar 
+            <span class="float-end">Rp <span id="total-final">2.500</span></span>
+          </p>
+
         </div>
       </div>
 
       <!-- Form -->
-      <div class="bg-white p-4 rounded shadow-sm border">
-        <h2 class="h5 fw-bold text-orange-600 mb-3">Form Pembelian Tiket</h2>
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white fw-semibold fs-5">Form Pemesanan</div>
+        <div class="card-body">
+          @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+          @endif
 
-        @if(session('error'))
-          <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
+          @if($errors->any())
+            <div class="alert alert-danger">
+              <ul class="mb-0 ps-3">
+                @foreach($errors->all() as $err)
+                  <li>{{ $err }}</li>
+                @endforeach
+              </ul>
+            </div>
+          @endif
 
-        @if($errors->any())
-          <div class="alert alert-danger">
-            <ul class="mb-0 ps-3">
-              @foreach($errors->all() as $err)
-                <li>{{ $err }}</li>
-              @endforeach
-            </ul>
-          </div>
-        @endif
+          <div id="ticket-error" class="alert alert-danger d-none"></div>
 
-        <form action="{{ route('ticket.store') }}" method="POST">
-          @csrf
+          <form action="{{ route('ticket.store') }}" method="POST" id="ticket-form">
+            @csrf
+            <div class="mb-3">
+              <label class="form-label">Email Pembeli</label>
+              <input type="email" name="email" class="form-control" required placeholder="nama@gmail.com" value="{{ old('email') }}" />
+            </div>
 
-          <!-- Email -->
-          <div class="mb-4">
-            <label class="form-label">Email Pembeli:</label>
-            <input type="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="contoh: nama@email.com" />
-          </div>
+            <input type="hidden" name="qty" id="ticketQty" value="0">
+            <div id="pengunjung-list"></div>
 
-          <!-- Dynamic Pengunjung -->
-          <div id="pengunjung-list"></div>
-
-          <!-- Submit -->
-          <div class="mt-4">
-            <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #ea580c;">
-              Lanjut ke Pembayaran
+            <button type="submit" class="btn btn-primary w-100 mt-3" id="checkout-btn" disabled>
+              Checkout & Lanjut ke Pembayaran
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- Order Summary -->
-    <div class="col-lg-4 mt-4 mt-lg-0">
-      <div class="bg-light p-4 rounded shadow-sm border">
-        <h5 class="fw-bold text-orange-600 mb-3">Ringkasan Pesanan</h5>
-        <p class="mb-1">Harga Tiket: <span class="float-end">Rp <span id="ticket-price">50000</span></span></p>
-        <p class="mb-1">Jumlah Tiket: <span class="float-end" id="ticket-count">1</span></p>
-        <hr>
-        <p class="fw-semibold">Total: <span class="float-end">Rp <span id="total-price">50000</span></span></p>
+  <!-- Modal Konfirmasi -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Konfirmasi Hapus</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p id="deleteModalMessage">Apakah Anda yakin ingin menghapus data?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button class="btn btn-danger" id="confirmDeleteBtn">Hapus</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <script>
   const ticketPrice = 50000;
 
-  function updateQty(change) {
-    const qtyInput = document.getElementById('ticketQty');
-    let qty = parseInt(qtyInput.value) || 1;
-    qty += change;
-    if (qty < 1) qty = 1;
-    qtyInput.value = qty;
-    updateSummary();
-    updateFormFields(qty);
+  function updateSummary(qty) {
+    const adminFee = 2500;
+    const subtotal = qty * ticketPrice;
+    const total = subtotal + adminFee;
+
+    document.getElementById('ticket-count').innerText = qty;
+    document.getElementById('total-price').innerText = subtotal.toLocaleString();
+    document.getElementById('total-final').innerText = total.toLocaleString();
+    document.getElementById('checkout-btn').disabled = qty === 0;
   }
 
-  function updateSummary() {
-    const qty = parseInt(document.getElementById('ticketQty').value) || 1;
-    document.getElementById('ticket-count').innerText = qty;
-    document.getElementById('total-price').innerText = (ticketPrice * qty).toLocaleString();
-  }
 
   function updateFormFields(qty) {
     const wrapper = document.getElementById('pengunjung-list');
-    const currentData = [];
-    wrapper.querySelectorAll('.pengunjung').forEach((el) => {
-      currentData.push({
-        name: el.querySelector('input[name="name[]"]').value,
-        phone: el.querySelector('input[name="phone[]"]').value
-      });
-    });
+    const current = wrapper.querySelectorAll('.pengunjung-entry').length;
+    for (let i = current; i < qty; i++) {
+      const div = document.createElement('div');
+      div.className = 'border rounded p-3 mb-3 position-relative pengunjung-entry';
+      div.innerHTML = `
+        <button type="button" class="btn position-absolute top-0 end-0 m-2 text-danger delete-btn">
+          <i class="fas fa-trash"></i>
+        </button>
+        <p class="fw-semibold mb-2">Data Pengunjung ${i + 1}</p>
+        <div class="mb-2">
+          <label class="form-label">Nama Lengkap:</label>
+          <input type="text" name="name[]" required class="form-control" placeholder="Nama sesuai KTP" />
+        </div>
+        <div>
+          <label class="form-label">No. Telepon:</label>
+          <input type="text" name="phone[]" required class="form-control" placeholder="08xxxxxxxxxx" />
+        </div>
+      `;
+      wrapper.appendChild(div);
+    }
+    attachDeleteHandlers();
+  }
 
-    wrapper.innerHTML = '';
-    for (let i = 0; i < qty; i++) {
-      const data = currentData[i] || {name: '', phone: '' };
-      addPengunjung(data.name, data.phone);
+
+  function renderTicketControls(qty) {
+    const control = document.getElementById('ticket-control');
+    if (qty > 0) {
+      control.innerHTML = `
+        <div class="d-flex align-items-center">
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="decreaseTicket()">−</button>
+          <span class="mx-2">${qty}</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addTicket()">+</button>
+        </div>
+      `;
+    } else {
+      control.innerHTML = `
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTicket()">Tambah</button>
+      `;
     }
   }
 
-  function addPengunjung(name = '', phone = '') {
+  function addTicket() {
+    hideError();
+    let qty = parseInt(document.getElementById('ticketQty').value || 0);
+    if (qty >= 3) {
+      showError('Maksimal hanya boleh memesan 3 tiket dalam 1 transaksi.');
+      return;
+    }
+    qty += 1;
+    document.getElementById('ticketQty').value = qty;
+    updateSummary(qty);
+    renderTicketControls(qty);
+    updateFormFields(qty);
+  }
+
+  function decreaseTicket() {
+    let qty = parseInt(document.getElementById('ticketQty').value || 0);
+    if (qty > 1) {
+      qty -= 1;
+      document.getElementById('ticketQty').value = qty;
+      updateSummary(qty);
+      renderTicketControls(qty);
+      updateFormFields(qty);
+    } else {
+      showError('Minimal harus ada 1 tiket.');
+    }
+  }
+
+  function showError(message) {
+    const errorDiv = document.getElementById('ticket-error');
+    errorDiv.innerText = message;
+    errorDiv.classList.remove('d-none');
+  }
+
+  function hideError() {
+    const errorDiv = document.getElementById('ticket-error');
+    errorDiv.innerText = '';
+    errorDiv.classList.add('d-none');
+  }
+
+  let deleteIndex = null;
+
+  function confirmDeleteVisitor(index) {
     const wrapper = document.getElementById('pengunjung-list');
-    const count = wrapper.querySelectorAll('.pengunjung').length + 1;
-
-    const div = document.createElement('div');
-    div.className = 'pengunjung bg-white p-3 rounded border mb-3';
-    div.innerHTML = `
-      <h6 class="fw-bold text-orange-600 mb-3">Data Pengunjung ${count}</h6>
-      <div class="mb-2">
-        <label class="form-label">Nama Lengkap:</label>
-        <input type="text" name="name[]" value="${name}" required class="form-control" placeholder="Nama sesuai KTP" />
-      </div>
-      <div class="mb-2">
-        <label class="form-label">No. Telepon:</label>
-        <input type="text" name="phone[]" value="${phone}" class="form-control" required placeholder="08xxxxxxxxxx" />
-      </div>
-      <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.parentElement.remove(); updateAfterRemove()">Hapus Pengunjung</button>
-    `;
-    wrapper.appendChild(div);
+    const pengunjungs = wrapper.querySelectorAll('.pengunjung-entry');
+    const nameInput = pengunjungs[index]?.querySelector('input[name="name[]"]');
+    const name = nameInput?.value || 'pengunjung ini';
+    deleteIndex = index;
+    document.getElementById('deleteModalMessage').innerText =
+      `Apakah Anda yakin ingin menghapus data ${name}?`;
+    new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
   }
 
-  function updateAfterRemove() {
-    const forms = document.querySelectorAll('#pengunjung-list .pengunjung');
-    document.getElementById('ticketQty').value = forms.length;
-    forms.forEach((el, i) => {
-      const title = el.querySelector('h6');
-      if (title) title.textContent = `Data Pengunjung ${i + 1}`;
-    });
-    updateSummary();
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    @if(old('name'))
-      @foreach(old('name') as $i => $name)
-        addPengunjung(
-          @json(old('name')[$i] ?? ''),
-          @json(old('phone')[$i] ?? '')
-        );
-      @endforeach
-    @else
-      updateFormFields(1);
-    @endif
-    updateSummary();
+  document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+    if (deleteIndex !== null) {
+      actuallyRemoveVisitor(deleteIndex);
+      deleteIndex = null;
+    }
+    bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
   });
+
+  function actuallyRemoveVisitor(index) {
+    const wrapper = document.getElementById('pengunjung-list');
+    const pengunjungs = wrapper.querySelectorAll('.pengunjung-entry');
+
+    if (pengunjungs.length <= 1) {
+      showError('Minimal harus ada 1 tiket.');
+      return;
+    }
+
+    pengunjungs[index]?.remove();
+
+    const remaining = wrapper.querySelectorAll('.pengunjung-entry').length;
+    document.getElementById('ticketQty').value = remaining;
+    updateSummary(remaining);
+    renderTicketControls(remaining);
+    attachDeleteHandlers();
+    reindexVisitors(); 
+  }
+
+    window.onload = () => {
+    const oldNames = @json(old('name'));
+    const oldPhones = @json(old('phone'));
+
+    if (oldNames && oldNames.length > 0) {
+      document.getElementById('ticketQty').value = oldNames.length;
+      updateSummary(oldNames.length);
+      renderTicketControls(oldNames.length);
+
+      const wrapper = document.getElementById('pengunjung-list');
+      for (let i = 0; i < oldNames.length; i++) {
+        const div = document.createElement('div');
+        div.className = 'border rounded p-3 mb-3 position-relative pengunjung-entry';
+        div.innerHTML = `
+          <button type="button" class="btn position-absolute top-0 end-0 m-2 text-danger delete-btn">
+            <i class="fas fa-trash"></i>
+          </button>
+          <p class="fw-semibold mb-2">Data Pengunjung ${i + 1}</p>
+          <div class="mb-2">
+            <label class="form-label">Nama Lengkap:</label>
+            <input type="text" name="name[]" required class="form-control" value="${oldNames[i]}" placeholder="Nama sesuai KTP" />
+          </div>
+          <div>
+            <label class="form-label">No. Telepon:</label>
+            <input type="text" name="phone[]" required class="form-control" value="${oldPhones[i] ?? ''}" placeholder="08xxxxxxxxxx" />
+          </div>
+        `;
+        wrapper.appendChild(div);
+      }
+      attachDeleteHandlers();
+    } else {
+      renderTicketControls(0);
+      attachDeleteHandlers();
+    }
+  };
+
+  function attachDeleteHandlers() {
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach((btn, idx) => {
+      btn.onclick = () => confirmDeleteVisitor(idx);
+    });
+  }
+  function reindexVisitors() {
+    const wrapper = document.getElementById('pengunjung-list');
+    const pengunjungs = wrapper.querySelectorAll('.pengunjung-entry');
+    pengunjungs.forEach((entry, index) => {
+      const label = entry.querySelector('p.fw-semibold');
+      label.innerText = `Data Pengunjung ${index + 1}`;
+    });
+  }
+
 </script>
 @endsection

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -8,6 +9,7 @@ use Illuminate\Support\Carbon;
 use App\Models\Transaction;
 use Xendit\Xendit;
 use Xendit\QRCode;
+
 class TicketController extends Controller
 {
     public function create()
@@ -23,15 +25,24 @@ class TicketController extends Controller
             'phone' => 'array',
         ]);
 
+        if (count($request->name) > 3) {
+            return back()->with('error', 'Maksimal hanya boleh memesan 3 tiket dalam 1 transaksi.')->withInput();
+        }
+
+        $existing = DB::table('transactions')->where('email', $request->email)->exists();
+        if ($existing) {
+            return back()->with('error', 'Email ini sudah pernah digunakan untuk pemesanan sebelumnya.')->withInput();
+        }
+
         $jumlahPembeli = count($request->name);
         $hargaTiket = 50000;
-        $totalAmount = $jumlahPembeli * $hargaTiket;
+        $adminFee = 2500;
+        $totalAmount = ($jumlahPembeli * $hargaTiket) + $adminFee;
 
         $stok = DB::table('ticket_stock')->value('available_stock');
         if ($stok < $jumlahPembeli) {
             return back()->with('error', 'Stok tiket tidak mencukupi. Sisa stok: ' . $stok)->withInput();
         }
-
 
         DB::beginTransaction();
 
@@ -58,7 +69,6 @@ class TicketController extends Controller
                 ]);
             }
 
-
             DB::commit();
 
             return redirect()->route('ticket.payment', ['id' => $transactionId]);
@@ -74,7 +84,8 @@ class TicketController extends Controller
         $transaction = Transaction::findOrFail($id);
         $details = $transaction->details;
         $hargaTiket = 50000;
-        $totalBayar = count($details) * $hargaTiket;
+        $adminFee = 2500;
+        $totalBayar = (count($details) * $hargaTiket) + $adminFee;
 
         $errorMessage = null;
         $qrURL = null;
@@ -84,7 +95,7 @@ class TicketController extends Controller
             $apiKey = env('XENDIT_API_KEY');
             Xendit::setApiKey($apiKey);
 
-            // Buat external_id unik untuk menghindari duplikat
+            // Buat external_id unik
             $externalId = 'trx-' . $transaction->id . '-' . time();
 
             $qr = QRCode::create([
@@ -100,16 +111,15 @@ class TicketController extends Controller
             ]);
 
             $qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($qr['qr_string']);
-            // Simpan ID & URL QR ke database
+
             $transaction->qris_invoice_id = $qr['id'];
             $transaction->qris_url = $qr['qr_string'];
             $transaction->save();
-          
-            // Estimasi expired 15 menit dari sekarang
+
             $expiryTime = now()->addMinutes(15)->toIso8601String();
 
         } catch (\Exception $e) {
-            \Log::error('Xendit QRIS Error: ' . $e->getMessage());
+            Log::error('Xendit QRIS Error: ' . $e->getMessage());
             $errorMessage = $e->getMessage();
         }
 
@@ -117,14 +127,11 @@ class TicketController extends Controller
             'transaction',
             'details',
             'hargaTiket',
+            'adminFee',
             'totalBayar',
             'qrURL',
             'expiryTime',
             'errorMessage'
         ));
     }
-
-
-
-
 }
