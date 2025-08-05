@@ -7,14 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $fillable = [
-        'email', 'checkout_time', 'paid_time', 'payment_status',
-        'qris_invoice_id', 'qris_url', 'total_amount'
+        'email',
+        'checkout_time',
+        'paid_time',
+        'payment_status',
+        'qris_invoice_id',
+        'qris_url',
+        'total_amount'
     ];
 
-    public function details()
+    // Relasi ke tabel ticket_attendees
+    public function attendees()
     {
-        return $this->hasMany(TransactionDetail::class);
+        return $this->hasMany(TicketAttendee::class, 'transaction_id');
     }
-    public $timestamps = false;
 
+    public $timestamps = false;
 }
