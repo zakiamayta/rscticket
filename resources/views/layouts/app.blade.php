@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
   <title>@yield('title', 'RSCTix')</title>
 
   <!-- Tailwind CSS -->
@@ -15,9 +18,11 @@
   <!-- Font & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- icon sampah -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Swiper -->
@@ -49,8 +54,8 @@
       <div>
         <h3 class="text-xl font-bold mb-2">RSCTix</h3>
         <p class="text-sm text-gray-400 mb-2">Platform pembelian tiket konser terpercaya dan mudah digunakan.</p>
-        <p class="text-sm text-gray-400">📧 <a href="mailto:support@rsctix.id" class="hover:text-white">support@rsctix.id</a></p>
-        <p class="text-sm text-gray-400">📞 <a href="tel:+6281234567890" class="hover:text-white">+62 812-3456-7890</a></p>
+        <p class="text-sm text-gray-400">📧 <a href="mailto:rscsosmed@gmail.com" class="hover:text-white">rscsosmed@gmail.com</a></p>
+        <p class="text-sm text-gray-400">📞 <a href="tel:+6285230088828" class="hover:text-white">+6285230088828</a></p>
       </div>
 
       <!-- Navigasi -->
@@ -59,9 +64,7 @@
         <ul class="space-y-1 text-sm text-gray-400">
           <li><a href="{{ url('/about-us') }}" class="hover:text-white">Tentang Kami</a></li>
           <li><a href="{{ url('/privacy-policy') }}" class="hover:text-white">Kebijakan Privasi</a></li>
-          <li><a href="{{ url('/faq') }}" class="hover:text-white">FAQ</a></li>
           <li><a href="{{ url('/terms') }}" class="hover:text-white">Syarat & Ketentuan</a></li>
-          <li><a href="{{ url('/contact') }}" class="hover:text-white">Kontak</a></li>
         </ul>
       </div>
 
@@ -71,9 +74,6 @@
         <div class="flex space-x-4">
           <a href="https://instagram.com/rupasuaracahaya" target="_blank" class="hover:text-orange-400">
             <i class="fab fa-instagram text-xl"></i>
-          </a>
-          <a href="https://twitter.com/rupasuaracahaya" target="_blank" class="hover:text-orange-400">
-            <i class="fab fa-twitter text-xl"></i>
           </a>
           <a href="https://facebook.com/rupasuaracahaya" target="_blank" class="hover:text-orange-400">
             <i class="fab fa-facebook text-xl"></i>

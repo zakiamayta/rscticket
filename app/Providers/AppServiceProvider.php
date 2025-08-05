@@ -7,6 +7,7 @@ use Xendit\Xendit;
 
 class AppServiceProvider extends ServiceProvider
 {
+    
     /**
      * Register any application services.
      */
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        Xendit::setApiKey(env('XENDIT_API_KEY'));
+        \URL::forceScheme('https');
     }
+
 }
