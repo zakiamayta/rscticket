@@ -281,36 +281,5 @@ class TicketController extends Controller
         });
     }
 
-    public function handleWebhook(Request $request)
-    {
-        $data = $request->all();
-        Log::info('Xendit Webhook Diterima:', $data);
-
-        if (!isset($data['external_id']) || !isset($data['status'])) {
-            return response()->json(['message' => 'Invalid webhook'], 400);
-        }
-
-        preg_match('/trx-(\d+)-/', $data['external_id'], $matches);
-        if (!isset($matches[1])) {
-            return response()->json(['message' => 'Invalid ID'], 400);
-        }
-
-        $transactionId = $matches[1];
-        $transaction = DB::table('transactions')->where('id', $transactionId)->first();
-
-        if (!$transaction) {
-            return response()->json(['message' => 'Transaction not found'], 404);
-        }
-
-        if ($data['status'] === 'PAID' && $transaction->payment_status !== 'paid') {
-            DB::table('transactions')->where('id', $transactionId)->update([
-                'payment_status' => 'paid',
-                'updated_at' => now()
-            ]);
-            Log::info("✅ Transaction $transactionId updated to PAID");
-        }
-
-        return response()->json(['message' => 'Webhook processed'], 200);
-    }
     
 }

@@ -9,10 +9,6 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\VerifyCsrfToken;
 
 
-Route::post('/xendit/webhook', [WebhookController::class, 'handleCallback'])
-    ->withoutMiddleware([VerifyCsrfToken::class]);
-
-
 /*
 |--------------------------------------------------------------------------
 | WEB ROUTES
@@ -71,8 +67,6 @@ Route::get('/tiket/success/{id}', [TicketController::class, 'success'])->name('t
 Route::get('/tiket/failed/{id}', [TicketController::class, 'failed'])->name('ticket.failed');
 
 // Webhook callback (Xendit & QRIS)
-Route::post('/webhook/xendit', [TicketController::class, 'handleWebhook']);
-Route::post('/webhook/qris/callback', [WebhookController::class, 'handleCallback'])->name('webhook.qris.callback');
 
 // ====================
 // ADMIN ROUTES
