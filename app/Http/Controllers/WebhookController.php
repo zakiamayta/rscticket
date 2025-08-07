@@ -16,7 +16,7 @@ class WebhookController extends Controller
 
         // Logika update jika status dari webhook adalah PAID
         if (isset($data['id']) && $data['status'] === 'PAID') {
-            $transaction = Transaction::where('xendit_invoice_id', $data['id'])->first();
+            $transaction = Transaction::where('xendit_invoice_id', trim($data['id']))->first();
 
             if ($transaction) {
                 $transaction->payment_status = 'paid';  // Update kolom enum
