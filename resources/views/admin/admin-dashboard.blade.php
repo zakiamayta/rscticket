@@ -50,8 +50,8 @@
 <main class="container mx-auto px-6 py-6">
     <h2 class="text-2xl font-bold text-gray-900 mb-6">Daftar Transaksi</h2>
     <div class="mb-4 p-4 bg-green-100 border border-green-300 text-green-800 rounded">
-        <strong>Total Uang Masuk (Paid):</strong>
-        Rp{{ number_format($totalPaidAmount, 0, ',', '.') }}
+      <strong>Total Uang Masuk (Paid):</strong>
+      Rp{{ number_format($totalPaidAmount, 0, ',', '.') }}
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-md mb-6">

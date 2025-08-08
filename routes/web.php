@@ -84,7 +84,9 @@ Route::middleware('auth')->group(function () {
 });
 
 
-
+// ====================
+// QR ROUTES
+// ====================
 Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
 Route::get('/guest/qr/{id}', [GuestController::class, 'showQr'])->name('guests.qr');
 
