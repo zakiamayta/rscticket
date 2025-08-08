@@ -13,7 +13,11 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $transactions = $this->getAllTransactionData($request);
-        return view('admin.admin-dashboard', compact('transactions'));
+
+        // Tambahkan total uang paid
+        $totalPaidAmount = Transaction::where('payment_status', 'paid')->sum('total_amount');
+
+        return view('admin.admin-dashboard', compact('transactions', 'totalPaidAmount'));
     }
 
     public function getAllTransactionData(Request $request)
@@ -45,7 +49,6 @@ class DashboardController extends Controller
             ->get();
 
         if ($sortBy === 'name') {
-            // Jika ingin sort berdasarkan nama attendee pertama
             $transactions = $transactions->sortBy(function ($transaction) {
                 return optional($transaction->attendees->first())->name;
             })->values();
@@ -54,35 +57,62 @@ class DashboardController extends Controller
         return $transactions;
     }
 
-    public function exportPDF(Request $request)
-    {
-        $transactions = $this->getAllTransactionData($request);
-        $pdf = Pdf::loadView('admin.export-pdf', compact('transactions'));
-        return $pdf->download('transactions.pdf');
-    }
+public function exportPDF(Request $request)
+{
+    $transactions = $this->getAllTransactionData($request);
+    $totalPaidAmount = $transactions->where('payment_status', 'paid')->sum('total_amount');
+
+    $pdf = Pdf::loadView('admin.export-pdf', compact('transactions', 'totalPaidAmount'));
+    return $pdf->download('transactions.pdf');
+}
 
     public function exportSimpleExcel(Request $request): StreamedResponse
-    {
-        $transactions = $this->getAllTransactionData($request);
+{
+    $transactions = $this->getAllTransactionData($request);
+    $totalPaidAmount = $transactions->where('payment_status', 'paid')->sum('total_amount');
 
-        return response()->streamDownload(function () use ($transactions) {
-            $writer = SimpleExcelWriter::streamDownload('transactions.xlsx');
+    return response()->streamDownload(function () use ($transactions, $totalPaidAmount) {
+        $writer = SimpleExcelWriter::streamDownload('transactions.xlsx');
 
-            foreach ($transactions as $transaction) {
+        // Header
+        $writer->addRow([
+            'Email', 'Name', 'Phone Number', 'Checkout Time', 'Paid Time', 'Payment Status', 'Total Amount'
+        ]);
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->attendees->isEmpty()) {
+                $writer->addRow([
+                    $transaction->email,
+                    '-',
+                    '-',
+                    $transaction->checkout_time,
+                    $transaction->paid_time ?? '-',
+                    $transaction->payment_status,
+                    $transaction->total_amount,
+                ]);
+            } else {
                 foreach ($transaction->attendees as $attendee) {
                     $writer->addRow([
-                        'Email'          => $transaction->email,
-                        'Name'           => $attendee->name,
-                        'Phone Number'   => $attendee->phone_number ?? '-',
-                        'Checkout Time'  => $transaction->checkout_time,
-                        'Paid Time'      => $transaction->paid_time ?? '-',
-                        'Payment Status' => $transaction->payment_status,
-                        'Total Amount'   => $transaction->total_amount,
+                        $transaction->email,
+                        $attendee->name,
+                        $attendee->phone_number,
+                        $transaction->checkout_time,
+                        $transaction->paid_time ?? '-',
+                        $transaction->payment_status,
+                        $transaction->total_amount,
                     ]);
                 }
             }
+        }
 
-            $writer->close();
-        }, 'transactions.xlsx');
-    }
+        // Tambahkan total di akhir
+        $writer->addRow([
+            '', '', '', '', '', 'Total Paid',
+            $totalPaidAmount,
+        ]);
+
+        $writer->close();
+    }, 'transactions.xlsx');
+}
+
 }

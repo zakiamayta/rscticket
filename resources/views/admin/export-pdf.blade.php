@@ -26,6 +26,8 @@
 <body>
     <h2>Transaction Report</h2>
 
+    <h3>Total Uang Masuk (Paid): Rp{{ number_format($totalPaidAmount, 0, ',', '.') }}</h3>
+
     <table>
         <thead>
             <tr>
@@ -40,17 +42,29 @@
         </thead>
         <tbody>
             @foreach($transactions as $transaction)
-                @foreach($transaction->details as $detail)
+                @if($transaction->attendees->isEmpty())
                     <tr>
-                        <td>{{ $transaction->email }}</td>
-                        <td>{{ $detail->name }}</td>
-                        <td>{{ $detail->phone_number }}</td>
-                        <td>{{ $transaction->checkout_time }}</td>
+                        <td>{{ $transaction->email ?? '-' }}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>{{ $transaction->checkout_time ?? '-' }}</td>
                         <td>{{ $transaction->paid_time ?? '-' }}</td>
-                        <td>{{ ucfirst($transaction->payment_status) }}</td>
-                        <td>Rp{{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
+                        <td>{{ ucfirst($transaction->payment_status ?? '-') }}</td>
+                        <td>Rp{{ number_format($transaction->total_amount ?? 0, 0, ',', '.') }}</td>
                     </tr>
-                @endforeach
+                @else
+                    @foreach($transaction->attendees as $attendee)
+                        <tr>
+                            <td>{{ $transaction->email ?? '-' }}</td>
+                            <td>{{ $attendee->name ?? '-' }}</td>
+                            <td>{{ $attendee->phone_number ?? '-' }}</td>
+                            <td>{{ $transaction->checkout_time ?? '-' }}</td>
+                            <td>{{ $transaction->paid_time ?? '-' }}</td>
+                            <td>{{ ucfirst($transaction->payment_status ?? '-') }}</td>
+                            <td>Rp{{ number_format($transaction->total_amount ?? 0, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                @endif
             @endforeach
         </tbody>
     </table>

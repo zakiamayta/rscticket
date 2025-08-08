@@ -7,15 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $fillable = [
-        'email',
-        'checkout_time',
-        'paid_time',
-        'payment_status',
-        'xendit_invoice_id',
-        'xendit_invoice_url',
-        'total_amount',
-        'qr_code'
-    ];
+    'user_id',
+    'total_price',
+    'payment_method',
+    'status',
+    'email',
+    'checkout_time',
+    'paid_time',
+    'payment_status',
+    'xendit_invoice_id',
+    'xendit_invoice_url',
+    'qr_code',
+    'total_amount'
+];
 
     // Relasi ke tabel ticket_attendees
     public function attendees()
