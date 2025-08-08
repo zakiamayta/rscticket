@@ -3,30 +3,53 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 class AdminController extends Controller
 {
-    public function absensi()
+    use App\Models\TicketAttendee;
+
+public function absensi()
+{
+    $attendees = TicketAttendee::with('transaction')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('absen.index', compact('attendees'));
+}
+
+
+
+
+    public function absenManual($id)
     {
-        $transactions = Transaction::with(['attendance', 'attendees'])->orderBy('checkout_time', 'desc')->get();
-        return view('absen.index', compact('transactions')); // ← path diganti ke 'absen.index'
+        $attendee = TicketAttendee::find($id);
+
+        if (! $attendee) {
+            return redirect()->back()->with('error', 'Peserta tidak ditemukan.');
+        }
+
+        // Tandai peserta sudah absen
+        $attendee->is_registered = true;
+        $attendee->registered_at = now();
+        $attendee->save();
+
+        return redirect()->back()->with('success', 'Absensi manual berhasil dilakukan.');
     }
 
-
-    public function markPresence(Transaction $transaction)
+    public function batalAbsen($id)
     {
-        $attendance = Attendance::updateOrCreate(
-            ['transaction_id' => $transaction->id],
-            ['status' => 'present', 'registered_at' => now()]
-        );
+        $attendee = TicketAttendee::find($id);
 
-        return back()->with('success', 'Absensi berhasil dicatat.');
+        if (! $attendee) {
+            return redirect()->back()->with('error', 'Peserta tidak ditemukan.');
+        }
+
+        // Batalkan status absen peserta
+        $attendee->is_registered = false;
+        $attendee->registered_at = null;
+        $attendee->save();
+
+        return redirect()->back()->with('success', 'Status absensi berhasil dibatalkan.');
     }
 
-    public function cancelPresence(Transaction $transaction)
-    {
-        Attendance::where('transaction_id', $transaction->id)->delete();
-        return back()->with('success', 'Absensi berhasil dibatalkan.');
-    }
 
 }

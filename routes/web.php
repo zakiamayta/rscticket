@@ -9,7 +9,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\GuestController;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\AbsensiController;
-
+use App\Http\Controllers\AdminController;
 /*
 |--------------------------------------------------------------------------
 | WEB ROUTES
@@ -91,6 +91,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/absensi/{transaction}/mark', [AdminController::class, 'markPresence'])->name('admin.absensi.mark');
     Route::post('/admin/absensi/{transaction}/cancel', [AdminController::class, 'cancelPresence'])->name('admin.absensi.cancel');
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::post('/absensi/manual/{id}', [AdminController::class, 'absenManual'])->name('admin.absensi.manual');
+    Route::post('/absensi/batal/{id}', [AdminController::class, 'batalAbsen'])->name('admin.absensi.batal');
+    Route::get('/admin/attendee/{email}', [AdminController::class, 'showAttendeeDetail'])->name('admin.attendee.detail');
+
 
 });
 

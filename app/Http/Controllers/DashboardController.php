@@ -7,13 +7,17 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Models\TicketAttendee;
 
 class DashboardController extends Controller
 {
     public function absensi()
     {
-        return view('admin.admin-absensi');
+        $attendees = TicketAttendee::with('transaction')->get();
+
+        return view('admin.admin-absensi', compact('attendees'));
     }
+    
     public function index(Request $request)
     {
         $transactions = $this->getAllTransactionData($request);
@@ -61,62 +65,64 @@ class DashboardController extends Controller
         return $transactions;
     }
 
-public function exportPDF(Request $request)
-{
-    $transactions = $this->getAllTransactionData($request);
-    $totalPaidAmount = $transactions->where('payment_status', 'paid')->sum('total_amount');
+    public function exportPDF(Request $request)
+    {
+        $transactions = $this->getAllTransactionData($request);
+        $totalPaidAmount = $transactions->where('payment_status', 'paid')->sum('total_amount');
 
-    $pdf = Pdf::loadView('admin.export-pdf', compact('transactions', 'totalPaidAmount'));
-    return $pdf->download('transactions.pdf');
-}
+        $pdf = Pdf::loadView('admin.export-pdf', compact('transactions', 'totalPaidAmount'));
+        return $pdf->download('transactions.pdf');
+    }
 
     public function exportSimpleExcel(Request $request): StreamedResponse
-{
-    $transactions = $this->getAllTransactionData($request);
-    $totalPaidAmount = $transactions->where('payment_status', 'paid')->sum('total_amount');
+    {
+        $transactions = $this->getAllTransactionData($request);
+        $totalPaidAmount = $transactions->where('payment_status', 'paid')->sum('total_amount');
 
-    return response()->streamDownload(function () use ($transactions, $totalPaidAmount) {
-        $writer = SimpleExcelWriter::streamDownload('transactions.xlsx');
+        return response()->streamDownload(function () use ($transactions, $totalPaidAmount) {
+            $writer = SimpleExcelWriter::streamDownload('transactions.xlsx');
 
-        // Header
-        $writer->addRow([
-            'Email', 'Name', 'Phone Number', 'Checkout Time', 'Paid Time', 'Payment Status', 'Total Amount'
-        ]);
+            // Header
+            $writer->addRow([
+                'Email', 'Name', 'Phone Number', 'Checkout Time', 'Paid Time', 'Payment Status', 'Total Amount'
+            ]);
 
-        foreach ($transactions as $transaction) {
-            if ($transaction->attendees->isEmpty()) {
-                $writer->addRow([
-                    $transaction->email,
-                    '-',
-                    '-',
-                    $transaction->checkout_time,
-                    $transaction->paid_time ?? '-',
-                    $transaction->payment_status,
-                    $transaction->total_amount,
-                ]);
-            } else {
-                foreach ($transaction->attendees as $attendee) {
+            foreach ($transactions as $transaction) {
+                if ($transaction->attendees->isEmpty()) {
                     $writer->addRow([
                         $transaction->email,
-                        $attendee->name,
-                        $attendee->phone_number,
+                        '-',
+                        '-',
                         $transaction->checkout_time,
                         $transaction->paid_time ?? '-',
                         $transaction->payment_status,
                         $transaction->total_amount,
                     ]);
+                } else {
+                    foreach ($transaction->attendees as $attendee) {
+                        $writer->addRow([
+                            $transaction->email,
+                            $attendee->name,
+                            $attendee->phone_number,
+                            $transaction->checkout_time,
+                            $transaction->paid_time ?? '-',
+                            $transaction->payment_status,
+                            $transaction->total_amount,
+                        ]);
+                    }
                 }
             }
-        }
 
-        // Tambahkan total di akhir
-        $writer->addRow([
-            '', '', '', '', '', 'Total Paid',
-            $totalPaidAmount,
-        ]);
+            // Tambahkan total di akhir
+            $writer->addRow([
+                '', '', '', '', '', 'Total Paid',
+                $totalPaidAmount,
+            ]);
 
-        $writer->close();
-    }, 'transactions.xlsx');
-}
+            $writer->close();
+        }, 'transactions.xlsx');
+        
+    } 
 
-}
+
+};

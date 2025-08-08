@@ -34,8 +34,7 @@ class WebhookController extends Controller
                     }
 
                     // Data yang akan dikodekan dalam QR
-                    $qrData = route('absen.form', ['id' => $transaction->id]);
-
+                    $qrData = route('tickets.show', ['id' => $transaction->id]);
 
                     // Nama file QR
                     $qrFileName = 'ticket_' . $transaction->id . '.png';
