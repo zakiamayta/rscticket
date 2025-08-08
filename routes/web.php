@@ -6,6 +6,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\GuestController;
 use App\Http\Middleware\VerifyCsrfToken;
 
 
@@ -81,3 +82,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportPDF'])->name('admin.dashboard.export.pdf');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
+
+
+
+Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+Route::get('/guest/qr/{id}', [GuestController::class, 'showQr'])->name('guests.qr');
+

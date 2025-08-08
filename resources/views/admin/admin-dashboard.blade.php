@@ -6,160 +6,226 @@
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <style>
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body class="bg-white font-[Inter,sans-serif] min-h-screen">
+<body class="bg-gray-100 font-[Inter,sans-serif] min-h-screen text-gray-800">
 
 {{-- Header --}}
-<header class="bg-white border-b shadow-sm px-10 py-4 flex justify-between items-center">
-    <div class="flex items-center gap-3">
+<header class="bg-white border-b border-gray-200 shadow-sm px-6 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-2">
         <div class="w-6 h-6 text-blue-600">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
             </svg>
         </div>
-        <h1 class="text-xl font-semibold text-gray-800">Admin Dashboard</h1>
+        <h1 class="text-xl font-bold text-gray-900">Admin Dashboard</h1>
     </div>
     <form action="{{ route('logout') }}" method="POST">
         @csrf
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200 shadow-sm">
             Logout
         </button>
     </form>
 </header>
 
-<main class="px-10 py-6">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Transaction List</h2>
+<main class="container mx-auto px-6 py-6">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Daftar Transaksi</h2>
+    <div class="bg-white p-5 rounded-xl shadow-md mb-6">
+        <form method="GET" action="{{ route('admin.dashboard') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+            <div class="lg:col-span-1">
+                <label for="start_date" class="block text-xs font-medium text-gray-700">Tanggal Mulai</label>
+                <input type="date" id="start_date" name="start_date" class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm" value="{{ request('start_date') }}">
+            </div>
+            <div class="lg:col-span-1">
+                <label for="end_date" class="block text-xs font-medium text-gray-700">Tanggal Selesai</label>
+                <input type="date" id="end_date" name="end_date" class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm" value="{{ request('end_date') }}">
+            </div>
+            <div class="lg:col-span-1">
+                <label for="payment_status" class="block text-xs font-medium text-gray-700">Status Pembayaran</label>
+                <select id="payment_status" name="payment_status" class="form-select mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                    <option value="">-- Semua Status --</option>
+                    <option value="paid" @if(request('payment_status') === 'paid') selected @endif>Paid</option>
+                    <option value="unpaid" @if(request('payment_status') === 'unpaid') selected @endif>Unpaid</option>
+                </select>
+            </div>
+            <div class="lg:col-span-1">
+                <label for="sort_by" class="block text-xs font-medium text-gray-700">Urutkan Berdasarkan</label>
+                <select id="sort_by" name="sort_by" class="form-select mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                    <option value="">-- Urutkan --</option>
+                    <option value="email" @if(request('sort_by') === 'email') selected @endif>Email</option>
+                    <option value="name" @if(request('sort_by') === 'name') selected @endif>Nama</option>
+                    <option value="payment_status" @if(request('sort_by') === 'payment_status') selected @endif>Status</option>
+                    <option value="checkout_time" @if(request('sort_by') === 'checkout_time') selected @endif>Waktu Checkout</option>
+                </select>
+            </div>
+            <div class="lg:col-span-1">
+                <label for="q" class="block text-xs font-medium text-gray-700">Pencarian</label>
+                <input type="text" id="q" name="q" placeholder="Cari email/nama" class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm" value="{{ request('q') }}"/>
+            </div>
+            <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm transition-colors shadow-sm">
+                    Filter
+                </button>
+                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold text-sm transition-colors text-center">Reset</a>
+            </div>
+        </form>
+    </div>
 
-    <form method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap gap-4 mb-6">
-        <input type="date" name="start_date" class="form-input w-48 border p-2 rounded" value="{{ request('start_date') }}">
-        <input type="date" name="end_date" class="form-input w-48 border p-2 rounded" value="{{ request('end_date') }}">
+    <div class="flex flex-wrap gap-3 mb-6">
+        <a href="{{ route('admin.dashboard.export.excel', request()->query()) }}" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-green-700 transition-colors shadow-sm">Export Excel (XLSX)</a>
+        <a href="{{ route('admin.dashboard.export.pdf', request()->query()) }}" class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-red-700 transition-colors shadow-sm" target="_blank">Export PDF</a>
+    </div>
 
-        <select name="payment_status" class="form-input w-48 border p-2 rounded">
-            <option value="">-- Semua Status --</option>
-            <option value="paid" @if(request('payment_status') === 'paid') selected @endif>Paid</option>
-            <option value="unpaid" @if(request('payment_status') === 'unpaid') selected @endif>Unpaid</option>
-        </select>
-
-        <select name="sort_by" class="form-input w-48 border p-2 rounded">
-            <option value="">-- Sortir Berdasarkan --</option>
-            <option value="email" @if(request('sort_by') === 'email') selected @endif>Email</option>
-            <option value="name" @if(request('sort_by') === 'name') selected @endif>Name</option>
-            <option value="payment_status" @if(request('sort_by') === 'payment_status') selected @endif>Status</option>
-            <option value="checkout_time" @if(request('sort_by') === 'checkout_time') selected @endif>Checkout Time</option>
-        </select>
-
-        <input type="text" name="q" placeholder="Cari email/nama" class="form-input w-64 border p-2 rounded" value="{{ request('q') }}"/>
-
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Filter</button>
-        <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 rounded bg-gray-200">Reset</a>
-
-        <div class="flex gap-4 mb-4">
-            <a href="{{ route('admin.dashboard.export.excel', request()->query()) }}" class="bg-green-600 text-white px-4 py-2 rounded">Export Excel (XLSX)</a>
-            <a href="{{ route('admin.dashboard.export.pdf', request()->query()) }}" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition text-sm" target="_blank">Export PDF</a>
-        </div>
-    </form>
-
-    <div class="bg-white border rounded-xl shadow overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50 text-left text-gray-600 font-semibold">
-                <tr>
-                    <th class="px-4 py-3">Email</th>
-                    <th class="px-4 py-3">Checkout Time</th>
-                    <th class="px-4 py-3">Paid Time</th>
-                    <th class="px-4 py-3">Payment Status</th>
-                    <th class="px-4 py-3">Total Amount</th>
-                    <th class="px-4 py-3">QR Code</th>
-                    <th class="px-4 py-3">Jumlah Tiket</th>
-                    <th class="px-4 py-3">Detail</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($transactions as $transaction)
-                    <tr class="hover:bg-gray-50 text-gray-700">
-                        <td class="px-4 py-2">{{ $transaction->email }}</td>
-                        <td class="px-4 py-2">{{ $transaction->checkout_time }}</td>
-                        <td class="px-4 py-2">{{ $transaction->paid_time ?? '-' }}</td>
-                        <td class="px-4 py-2">
-                            <span class="inline-block px-2 py-1 rounded text-xs font-medium 
-                                {{ $transaction->payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                {{ ucfirst($transaction->payment_status) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-2">Rp{{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
-                        <td class="px-4 py-2">
-                            @if($transaction->qris_url)
-                                <a href="{{ $transaction->qris_url }}" target="_blank" class="text-blue-600 hover:underline font-medium">View QR</a>
-                            @else
-                                <span class="text-gray-400">N/A</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-2">{{ $transaction->attendees->count() }}</td>
-                        <td class="px-4 py-2">
-                            <button onclick="showDetail({{ $transaction->id }})"
-                                class="text-sm text-blue-600 hover:underline">
-                                Detail
-                            </button>
-                        </td>
-                    </tr>
-                @empty
+    <div class="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50 text-left text-gray-600 font-semibold uppercase tracking-wider">
                     <tr>
-                        <td colspan="8" class="text-center text-gray-500 py-6">No transactions found.</td>
+                        <th class="px-4 py-3">Email</th>
+                        <th class="px-4 py-3">Waktu Checkout</th>
+                        <th class="px-4 py-3">Waktu Pembayaran</th>
+                        <th class="px-4 py-3">Status Pembayaran</th>
+                        <th class="px-4 py-3">Total Jumlah</th>
+                        <th class="px-4 py-3">QR Code</th>
+                        <th class="px-4 py-3">Jumlah Tiket</th>
+                        <th class="px-4 py-3">Aksi</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    @forelse ($transactions as $transaction)
+                        <tr class="hover:bg-gray-50 text-gray-700 transition-colors duration-150">
+                            <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->email }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->checkout_time }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->paid_time ?? '-' }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                    {{ $transaction->payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                    {{ ucfirst($transaction->payment_status) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-2 whitespace-nowrap">Rp{{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">
+                                @if($transaction->qr_code)
+                                    <a href="{{ route('guests.qr', $transaction->id) }}" target="_blank"
+                                       class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                                        </svg>
+                                        QR
+                                    </a>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->attendees->count() }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">
+                                <button onclick="showDetail({{ $transaction->id }})"
+                                        class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Detail
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-gray-500 py-6">Tidak ada transaksi yang ditemukan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </main>
 
 {{-- Modal --}}
-<div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded shadow max-w-lg w-full">
-        <h3 class="text-lg font-semibold mb-4">Detail Pembeli Tiket</h3>
-        <div id="modalContent"></div>
-        <button onclick="closeModal()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Tutup</button>
+<div id="detailModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full transform transition-all duration-300 scale-95 opacity-0" id="modalContentWrapper">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Detail Pembeli Tiket</h3>
+        <div id="modalContent" class="max-h-80 overflow-y-auto custom-scrollbar text-sm"></div>
+        <button onclick="closeModal()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold transition-colors">Tutup</button>
     </div>
 </div>
 
 <script>
-function showDetail(transactionId) {
-    const transactions = @json($transactions);
+    function showDetail(transactionId) {
+        const transactions = @json($transactions);
+        const transaction = transactions.find(t => t.id === transactionId);
 
-    const transaction = transactions.find(t => t.id === transactionId);
-    if (!transaction) return;
+        if (!transaction) return;
 
-    let html = '';
-    if (transaction.attendees.length === 0) {
-        html = '<p class="text-gray-500">Tidak ada data pembeli tiket.</p>';
-    } else {
-        html = `
-        <table class="min-w-full text-sm border">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="border px-2 py-1">Nama</th>
-                    <th class="border px-2 py-1">Nomor HP</th>
-                    <th class="border px-2 py-1">Ticket ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${transaction.attendees.map(a => `
-                    <tr>
-                        <td class="border px-2 py-1">${a.name}</td>
-                        <td class="border px-2 py-1">${a.phone_number ?? '-'}</td>
-                        <td class="border px-2 py-1">${a.ticket_id}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-        `;
+        let html = '';
+        if (transaction.attendees.length === 0) {
+            html = '<p class="text-gray-500 italic text-center">Tidak ada data pembeli tiket.</p>';
+        } else {
+            html = `
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-3 py-2 font-semibold text-gray-600 text-left">Nama</th>
+                            <th class="px-3 py-2 font-semibold text-gray-600 text-left">Nomor HP</th>
+                            <th class="px-3 py-2 font-semibold text-gray-600 text-left">ID Tiket</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        ${transaction.attendees.map(a => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-3 py-2">${a.name}</td>
+                                <td class="px-3 py-2">${a.phone_number ?? '-'}</td>
+                                <td class="px-3 py-2">${a.ticket_id}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            `;
+        }
+
+        document.getElementById('modalContent').innerHTML = html;
+        const modal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContentWrapper');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 50);
     }
 
-    document.getElementById('modalContent').innerHTML = html;
-    document.getElementById('detailModal').classList.remove('hidden');
-}
+    function closeModal() {
+        const modal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContentWrapper');
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
 
-function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-}
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
 </script>
 
 </body>

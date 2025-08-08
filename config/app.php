@@ -166,11 +166,17 @@ return [
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
+        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
         // Uncomment jika ada
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
     ],
+
+    'aliases' => [
+    'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
+],
+
 
 
 ];

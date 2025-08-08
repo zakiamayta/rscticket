@@ -281,5 +281,17 @@ class TicketController extends Controller
         });
     }
 
+    public function show($id)
+{
+    $transaction = Transaction::with('attendees')->find($id);
+
+    if (!$transaction || $transaction->payment_status !== 'paid') {
+        abort(404, 'Tiket tidak ditemukan atau belum dibayar.');
+    }
+
+    return view('ticket.viewqr', compact('transaction'));
+}
+
+
     
 }
