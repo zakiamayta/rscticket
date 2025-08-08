@@ -1,26 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tiket {{ $eventTitle }}</title>
-    <style>
-        body { font-family: sans-serif; }
-        .ticket { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
-    </style>
+    <meta charset="utf-8">
+    <title>Tiket {{ $transaction->event_name }}</title>
 </head>
-<body>
-    <h2>Konser: {{ $eventTitle }}</h2>
-    <p>Tanggal: {{ $eventDate }}</p>
-    <p>Jam: {{ $eventTime }}</p>
-    <hr>
-
-    @foreach ($details as $i => $detail)
-        <div class="ticket">
-            <p><strong>Nama:</strong> {{ $detail['name'] }}</p>
-            <p><strong>ID Pembeli:</strong> {{ $buyerId }}</p>
-            <p><strong>Tiket ke-{{ $i+1 }}</strong></p>
-            <p><strong>Kode:</strong> {{ $detail['barcode'] }}</p>
-            <img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($detail['barcode'], 'C39') }}" alt="Barcode" />
-        </div>
-    @endforeach
+<body style="font-family: sans-serif; text-align: center;">
+    <h2>{{ $transaction->event_name }}</h2>
+    <p>{{ $transaction->event_date }} - {{ $transaction->event_time }}</p>
+    <p><strong>Nama:</strong> {{ $transaction->customer_name }}</p>
+    <p><strong>Kode Tiket:</strong> {{ $transaction->id }}</p>
+    <img src="{{ $qrPath }}" style="width:200px; margin-top: 20px;">
 </body>
 </html>

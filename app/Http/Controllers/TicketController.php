@@ -252,45 +252,17 @@ class TicketController extends Controller
         ]);
     }
 
-    public function sendTicketEmail($transaction)
-    {
-        $eventTitle = "NEGATIFA Live";
-        $eventDate = "10 Agustus 2025";
-        $eventTime = "19:00 WIB";
-
-        $details = [];
-        foreach ($transaction->details as $detail) {
-            $details[] = [
-                'name' => $detail->name,
-                'barcode' => strtoupper(substr(md5($transaction->id . $detail->id), 0, 10)),
-            ];
-        }
-
-        $pdf = Pdf::loadView('emails.ticket-pdf', [
-            'eventTitle' => $eventTitle,
-            'eventDate' => $eventDate,
-            'eventTime' => $eventTime,
-            'buyerId' => $transaction->id,
-            'details' => $details,
-        ]);
-
-        Mail::send('emails.ticket-notify', ['transaction' => $transaction], function ($message) use ($transaction, $pdf) {
-            $message->to($transaction->email)
-                    ->subject('E-Ticket Konser NEGATIFA')
-                    ->attachData($pdf->output(), 'e-ticket.pdf');
-        });
-    }
 
     public function show($id)
-{
-    $transaction = Transaction::with('attendees')->find($id);
+    {
+        $transaction = Transaction::with('attendees')->find($id);
 
-    if (!$transaction || $transaction->payment_status !== 'paid') {
-        abort(404, 'Tiket tidak ditemukan atau belum dibayar.');
+        if (!$transaction || $transaction->payment_status !== 'paid') {
+            abort(404, 'Tiket tidak ditemukan atau belum dibayar.');
+        }
+
+        return view('ticket.viewqr', compact('transaction'));
     }
-
-    return view('ticket.viewqr', compact('transaction'));
-}
 
 
     

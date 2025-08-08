@@ -66,6 +66,7 @@ Route::post('/ticket/cancel/{id}', [TicketController::class, 'cancel'])->name('t
 // Status transaksi
 Route::get('/tiket/success/{id}', [TicketController::class, 'success'])->name('ticket.success');
 Route::get('/tiket/failed/{id}', [TicketController::class, 'failed'])->name('ticket.failed');
+Route::get('/tickets/{id}', [WebhookController::class, 'show'])->name('tickets.show');
 
 // Webhook callback (Xendit & QRIS)
 
@@ -81,6 +82,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard/export-excel', [DashboardController::class, 'exportSimpleExcel'])->name('admin.dashboard.export.excel');
     Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportPDF'])->name('admin.dashboard.export.pdf');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
 });
 
 
