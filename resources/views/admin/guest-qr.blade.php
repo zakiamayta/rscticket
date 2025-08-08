@@ -61,9 +61,10 @@
 
         {{-- URL QR Code --}}
         <p class="text-sm text-gray-500 mb-4">Scan QR code di atas atau kunjungi:</p>
-        <a href="{{ url('/absen/' . $guest->nip) }}" class="inline-block bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 break-all">
-            {{ url('/absen/' . $guest->nip) }}
+        <a href="{{ route('absen.form', ['id' => $guest->id]) }}" class="inline-block bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 break-all">
+            {{ route('absen.form', ['id' => $guest->id]) }}
         </a>
+
     </div>
 </main>
 

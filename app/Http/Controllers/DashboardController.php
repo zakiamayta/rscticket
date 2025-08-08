@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DashboardController extends Controller
 {
+    public function absensi()
+    {
+        return view('admin.admin-absensi');
+    }
     public function index(Request $request)
     {
         $transactions = $this->getAllTransactionData($request);
