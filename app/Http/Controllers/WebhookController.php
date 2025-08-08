@@ -37,11 +37,11 @@ class WebhookController extends Controller
                     $qrData = route('tickets.show', ['id' => $transaction->id]);
 
                     // Nama file QR
-                    $qrFileName = 'ticket_' . $transaction->id . '.svg';
+                    $qrFileName = 'ticket_' . $transaction->id . '.png';
                     $qrFullPath = $qrPath . '/' . $qrFileName;
 
                     // Generate QR
-                    QrCode::format('svg')
+                    QrCode::format('png')
                         ->size(300)
                         ->generate($qrData, $qrFullPath);
 

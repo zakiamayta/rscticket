@@ -56,7 +56,7 @@
 
         {{-- QR Code --}}
         <div class="my-6 p-4 bg-gray-50 rounded-lg border border-gray-200 inline-block">
-            <img src="{{ asset('qrcodes/ticket_' . $guest->id . '.svg') }}" alt="QR Code" class="mx-auto w-64 h-64 object-contain rounded-md shadow-inner">
+            <img src="{{ asset('qrcodes/ticket_' . $guest->id . '.png') }}" alt="QR Code" class="mx-auto w-64 h-64 object-contain rounded-md shadow-inner">
         </div>
 
         {{-- URL QR Code --}}
