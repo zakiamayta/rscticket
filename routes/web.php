@@ -8,8 +8,8 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\GuestController;
 use App\Http\Middleware\VerifyCsrfToken;
-
-
+use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\AdminController;
 /*
 |--------------------------------------------------------------------------
 | WEB ROUTES
@@ -83,12 +83,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportPDF'])->name('admin.dashboard.export.pdf');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
+    Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::get('/guest/qr/{id}', [GuestController::class, 'showQr'])->name('guests.qr');
+
+    Route::get('/absen/{id}', [AbsensiController::class, 'showPasswordForm'])->name('absen.form');
+    Route::post('/absen/{id}', [AbsensiController::class, 'handleScan'])->name('absen.submit');
+
+    Route::get('/admin/absensi', [DashboardController::class, 'absensi'])->name('admin.absensi');
+    Route::post('/admin/absensi/{transaction}/mark', [AdminController::class, 'markPresence'])->name('admin.absensi.mark');
+    Route::post('/admin/absensi/{transaction}/cancel', [AdminController::class, 'cancelPresence'])->name('admin.absensi.cancel');
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::post('/absensi/manual/{id}', [AdminController::class, 'absenManual'])->name('admin.absensi.manual');
+    Route::post('/absensi/batal/{id}', [AdminController::class, 'batalAbsen'])->name('admin.absensi.batal');
+    Route::get('/admin/attendee/{email}', [AdminController::class, 'showAttendeeDetail'])->name('admin.attendee.detail');
+
+
 });
-
-
-// ====================
-// QR ROUTES
-// ====================
-Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
-Route::get('/guest/qr/{id}', [GuestController::class, 'showQr'])->name('guests.qr');
 

@@ -36,56 +36,87 @@ class TicketController extends Controller
 
     public function store(Request $request)
     {
+        // Ambil tiket dan event
+        $ticket = DB::table('tickets')->where('id', $request->ticket_id)->first();
+        if (!$ticket) {
+            return back()->with('error', 'Tiket tidak ditemukan.')->withInput();
+        }
+
+        $event = DB::table('events')->where('id', $ticket->event_id)->first();
+        if (!$event) {
+            return back()->with('error', 'Event tidak ditemukan.')->withInput();
+        }
+
+        // Validasi dinamis sesuai max_tickets_per_email
         $request->validate([
-            'email' => 'required|email',
-            'name' => 'required|array|min:1|max:3',
+            'email' => [
+                'required', 'email',
+                function ($attribute, $value, $fail) use ($event) {
+                    if ($event->max_tickets_per_email == 1) {
+                        $exists = DB::table('transactions')
+                            ->join('tickets', 'transactions.id', '=', 'tickets.id')
+                            ->where('tickets.event_id', $event->id)
+                            ->where('transactions.email', $value)
+                            ->exists();
+                        if ($exists) {
+                            $fail('Email ini sudah digunakan untuk event ini.');
+                        }
+                    }
+                }
+            ],
+            'name' => 'required|array|min:1|max:' . $event->max_tickets_per_email,
             'name.*' => 'required|string',
             'phone' => 'array',
             'phone.*' => 'nullable|string',
             'ticket_id' => 'required|integer',
-            'qty' => 'required|integer|min:1|max:3'
+            'qty' => 'required|integer|min:1|max:' . $event->max_tickets_per_email,
         ]);
 
         DB::beginTransaction();
-
         try {
-            // Ambil data tiket
+            // Lock stok tiket
             $ticket = DB::table('tickets')->where('id', $request->ticket_id)->lockForUpdate()->first();
-            if (!$ticket || $ticket->stock < $request->qty) {
+            if ($ticket->stock < $request->qty) {
                 return back()->with('error', 'Stok tiket tidak mencukupi.')->withInput();
             }
 
             $hargaTiket = $ticket->price;
-            // ✅ Hapus admin fee
             $total = $request->qty * $hargaTiket;
-
 
             // Kurangi stok
             DB::table('tickets')->where('id', $ticket->id)
                 ->update(['stock' => $ticket->stock - $request->qty]);
 
+            // Simpan transaksi
             $transactionId = DB::table('transactions')->insertGetId([
+                'event_id' => $ticket->event_id,
                 'email' => $request->email,
                 'checkout_time' => now(),
-                'payment_status' => 'unpaid',
+                'payment_status' => $hargaTiket == 0 ? 'paid' : 'unpaid',
                 'total_amount' => $total,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
+            // Simpan data peserta
             foreach ($request->name as $i => $name) {
                 DB::table('ticket_attendees')->insert([
                     'transaction_id' => $transactionId,
                     'ticket_id' => $request->ticket_id,
                     'name' => $name,
-                    'phone_number' => $request->phone[$i] ?? null, 
+                    'phone_number' => $request->phone[$i] ?? null,
                 ]);
             }
 
+            // Kalau tiket gratis → langsung commit dan redirect sukses
+            if ($hargaTiket == 0) {
+                DB::commit();
+                return redirect()->route('ticket.success', ['id' => $transactionId])
+                    ->with('success', 'Pendaftaran berhasil. Tiket telah dikirim.');
+            }
 
-            // === Xendit Invoice ===
+            // Tiket berbayar → proses Xendit
             Xendit::setApiKey(env('XENDIT_API_KEY'));
-
             $externalId = 'trx-' . $transactionId . '-' . time();
             $params = [
                 'external_id' => $externalId,
@@ -96,11 +127,9 @@ class TicketController extends Controller
                 'failure_redirect_url' => route('ticket.failed', ['id' => $transactionId]),
                 'currency' => 'IDR',
                 'invoice_duration' => 15 * 60,
-                'payment_methods' => ['QRIS'],
             ];
 
             $invoice = Invoice::create($params);
-
             DB::table('transactions')->where('id', $transactionId)->update([
                 'xendit_invoice_url' => $invoice['invoice_url'],
                 'xendit_invoice_id' => $invoice['id'],
@@ -115,6 +144,7 @@ class TicketController extends Controller
             return back()->with('error', 'DB Error: '.$e->getMessage());
         }
     }
+
     public function payment($id)
     {
         $transaction = DB::table('transactions')->find($id);
@@ -158,7 +188,7 @@ class TicketController extends Controller
             'failure_redirect_url' => route('ticket.failed', ['id' => $transaction->id]),
             'currency' => 'IDR',
             'invoice_duration' => 15 * 60,
-            'payment_methods' => ['QRIS'],
+        
         ];
 
         $invoice = Invoice::create($params);
@@ -251,19 +281,5 @@ class TicketController extends Controller
             'details' => $details
         ]);
     }
-
-
-    public function show($id)
-    {
-        $transaction = Transaction::with('attendees')->find($id);
-
-        if (!$transaction || $transaction->payment_status !== 'paid') {
-            abort(404, 'Tiket tidak ditemukan atau belum dibayar.');
-        }
-
-        return view('ticket.viewqr', compact('transaction'));
-    }
-
-
     
 }

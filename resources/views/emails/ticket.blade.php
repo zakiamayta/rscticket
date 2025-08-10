@@ -1,20 +1,17 @@
 {{-- resources/views/emails/ticket.blade.php --}}
 <x-mail::message>
-# Halo {{ $transaction->customer_name }}
+# Halo {{ $buyerName ?? $transaction->email }}
 
-Terima kasih telah melakukan pembayaran. Berikut adalah detail tiket konser Anda:
+Terima kasih telah melakukan pembayaran. Berikut adalah detail tiket Anda:
 
-**Event:** {{ $transaction->event_name }}  
-**Tanggal:** {{ $transaction->event_date }}  
-**Lokasi:** {{ $transaction->event_location }}
+**Event:** {{ $event->title }}  
+**Tanggal:** {{ \Carbon\Carbon::parse($event->date)->translatedFormat('d F Y H:i') }}  
+**Lokasi:** {{ $event->location }}
 
-Silakan scan QR code pada lampiran saat masuk ke venue.
+QR Code tiket Anda ada pada lampiran email ini (format PDF dan PNG).  
+Silakan tunjukkan QR Code tersebut saat memasuki venue.
 
-<x-mail::button :url="route('tickets.show', $transaction->id)">
-Lihat Tiket Online
-</x-mail::button>
-
-Salam,  
+Salam hangat,  
 **RSCTix**
 
 Thanks,<br>

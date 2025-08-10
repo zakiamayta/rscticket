@@ -18,8 +18,10 @@ class WebhookController extends Controller
         Log::info('Xendit Webhook Received:', $data);
 
         // Proses jika status pembayaran adalah PAID
-        if (isset($data['id']) && $data['status'] === 'PAID') {
-            $transaction = Transaction::where('xendit_invoice_id', trim($data['id']))->first();
+        if (isset($data['id']) && strtoupper($data['status']) === 'PAID') {
+            $transaction = Transaction::with('items') // kalau ada relasi item tiket
+                ->where('xendit_invoice_id', trim($data['id']))
+                ->first();
 
             if ($transaction) {
                 // Update status pembayaran
@@ -49,15 +51,31 @@ class WebhookController extends Controller
                     // Simpan path ke database
                     $transaction->qr_code = 'qrcodes/' . $qrFileName;
 
-                    Log::info('QR Code generated and saved', ['transaction_id' => $transaction->id]);
+                    Log::info('QR Code generated and saved', [
+                        'transaction_id' => $transaction->id
+                    ]);
                 } catch (\Exception $e) {
-                    Log::error('Failed to generate QR Code', ['error' => $e->getMessage()]);
+                    Log::error('Failed to generate QR Code', [
+                        'error' => $e->getMessage(),
+                        'transaction_id' => $transaction->id
+                    ]);
                 }
 
-                // Simpan semua perubahan
+                // Simpan perubahan transaksi
                 $transaction->save();
-                $this->sendTicketEmail($transaction);
-                Log::info('Transaction updated successfully', ['transaction_id' => $transaction->id]);
+
+                try {
+                    // Kirim email tiket
+                    $this->sendTicketEmail($transaction);
+                    Log::info('Ticket email sent successfully', [
+                        'transaction_id' => $transaction->id
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send ticket email', [
+                        'error' => $e->getMessage(),
+                        'transaction_id' => $transaction->id
+                    ]);
+                }
 
                 return response()->json(['message' => 'Transaction updated'], 200);
             }
@@ -66,36 +84,36 @@ class WebhookController extends Controller
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
-        return response()->json(['message' => 'Ignored'], 200);
+        return response()->json(['message' => 'Invalid webhook data'], 400);
     }
 
-    private function sendTicketEmail(Transaction $transaction)
-    {
-        try {
-            // Path QR code
-            $qrPath = public_path($transaction->qr_code);
+        private function sendTicketEmail(Transaction $transaction)
+        {
+            try {
+                // Path QR code
+                $qrPath = public_path($transaction->qr_code);
 
-            // Generate PDF tiket
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('emails.ticket-pdf', [
-                'transaction' => $transaction,
-                'qrPath' => $qrPath
-            ]);
+                // Generate PDF tiket
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('emails.ticket-pdf', [
+                    'transaction' => $transaction,
+                    'qrPath' => $qrPath
+                ]);
 
-            $pdfPath = storage_path('app/public/tickets/ticket_' . $transaction->id . '.pdf');
-            $pdf->save($pdfPath);
+                $pdfPath = storage_path('app/public/tickets/ticket_' . $transaction->id . '.pdf');
+                $pdf->save($pdfPath);
 
-            // Kirim email + lampiran PDF
-            \Mail::to($transaction->customer_email)
-                ->send(new \App\Mail\TicketEmail($transaction, $pdfPath));
+                // Kirim email + lampiran PDF
+                \Mail::to($transaction->customer_email)
+                    ->send(new \App\Mail\TicketEmail($transaction, $pdfPath));
 
-            \Log::info('Ticket email sent', ['transaction_id' => $transaction->id]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send ticket email', [
-                'transaction_id' => $transaction->id,
-                'error' => $e->getMessage()
-            ]);
+                \Log::info('Ticket email sent', ['transaction_id' => $transaction->id]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send ticket email', [
+                    'transaction_id' => $transaction->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
-    }
     // WebhookController.php
     public function show(Request $request)
     {
@@ -124,5 +142,4 @@ class WebhookController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-
-}
+};

@@ -2,13 +2,17 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Tiket {{ $transaction->event_name }}</title>
+    <title>Tiket {{ $event->title }}</title>
 </head>
 <body style="font-family: sans-serif; text-align: center;">
-    <h2>{{ $transaction->event_name }}</h2>
-    <p>{{ $transaction->event_date }} - {{ $transaction->event_time }}</p>
-    <p><strong>Nama:</strong> {{ $transaction->customer_name }}</p>
-    <p><strong>Kode Tiket:</strong> {{ $transaction->id }}</p>
-    <img src="{{ $qrPath }}" style="width:200px; margin-top: 20px;">
+    <h2>{{ $event->title }}</h2>
+    <p>{{ \Carbon\Carbon::parse($event->date)->format('d M Y H:i') }} - {{ $event->location }}</p>
+
+    <p><strong>Email Pemesan:</strong> {{ $transaction->email }}</p>
+    <p><strong>Kode Transaksi:</strong> {{ $transaction->id }}</p>
+
+    @if(isset($qrPath))
+        <img src="{{ $qrPath }}" style="width:200px; margin-top: 20px;">
+    @endif
 </body>
 </html>

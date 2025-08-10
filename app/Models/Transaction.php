@@ -21,6 +21,11 @@ class Transaction extends Model
     'total_amount'
 ];
 
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id', 'id');
+    }
+
     // Relasi ke tabel ticket_attendees
     public function attendees()
     {

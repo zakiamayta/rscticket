@@ -12,25 +12,17 @@ class TicketEmail extends Mailable
 
     public $transaction;
     public $pdfPath;
+    public $qrPath;
 
-    public function __construct($transaction, $pdfPath = null)
+    public function __construct($transaction, $pdfPath = null, $qrPath = null)
     {
         $this->transaction = $transaction;
         $this->pdfPath = $pdfPath;
+        $this->qrPath = $qrPath;
     }
 
     public function build()
     {
-        $email = $this->subject('Tiket Anda - ' . $this->transaction->event_name)
-            ->view('emails.ticket-html');
-
-        if ($this->pdfPath && file_exists($this->pdfPath)) {
-            $email->attach($this->pdfPath, [
-                'as' => 'Tiket-' . $this->transaction->id . '.pdf',
-                'mime' => 'application/pdf'
-            ]);
-        }
-
-        return $email;
+        return $this->view('emails.ticket');
     }
 }

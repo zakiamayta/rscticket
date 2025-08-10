@@ -1,3 +1,7 @@
+@extends('layouts.admin')
+
+@section('title', 'Dashboard Admin')
+@section ('content')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,23 +33,6 @@
 </head>
 <body class="bg-gray-100 font-[Inter,sans-serif] min-h-screen text-gray-800">
 
-{{-- Header --}}
-<header class="bg-white border-b border-gray-200 shadow-sm px-6 py-3 flex justify-between items-center">
-    <div class="flex items-center gap-2">
-        <div class="w-6 h-6 text-blue-600">
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
-            </svg>
-        </div>
-        <h1 class="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-    </div>
-    <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm transition-colors duration-200 shadow-sm">
-            Logout
-        </button>
-    </form>
-</header>
 
 <main class="container mx-auto px-6 py-6">
     <h2 class="text-2xl font-bold text-gray-900 mb-6">Daftar Transaksi</h2>
@@ -55,45 +42,84 @@
     </div>
 
     <div class="bg-white p-5 rounded-xl shadow-md mb-6">
-        <form method="GET" action="{{ route('admin.dashboard') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
-            <div class="lg:col-span-1">
-                <label for="start_date" class="block text-xs font-medium text-gray-700">Tanggal Mulai</label>
-                <input type="date" id="start_date" name="start_date" class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm" value="{{ request('start_date') }}">
-            </div>
-            <div class="lg:col-span-1">
-                <label for="end_date" class="block text-xs font-medium text-gray-700">Tanggal Selesai</label>
-                <input type="date" id="end_date" name="end_date" class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm" value="{{ request('end_date') }}">
-            </div>
-            <div class="lg:col-span-1">
-                <label for="payment_status" class="block text-xs font-medium text-gray-700">Status Pembayaran</label>
-                <select id="payment_status" name="payment_status" class="form-select mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
-                    <option value="">-- Semua Status --</option>
-                    <option value="paid" @if(request('payment_status') === 'paid') selected @endif>Paid</option>
-                    <option value="unpaid" @if(request('payment_status') === 'unpaid') selected @endif>Unpaid</option>
-                </select>
-            </div>
-            <div class="lg:col-span-1">
-                <label for="sort_by" class="block text-xs font-medium text-gray-700">Urutkan Berdasarkan</label>
-                <select id="sort_by" name="sort_by" class="form-select mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
-                    <option value="">-- Urutkan --</option>
-                    <option value="email" @if(request('sort_by') === 'email') selected @endif>Email</option>
-                    <option value="name" @if(request('sort_by') === 'name') selected @endif>Nama</option>
-                    <option value="payment_status" @if(request('sort_by') === 'payment_status') selected @endif>Status</option>
-                    <option value="checkout_time" @if(request('sort_by') === 'checkout_time') selected @endif>Waktu Checkout</option>
-                </select>
-            </div>
-            <div class="lg:col-span-1">
-                <label for="q" class="block text-xs font-medium text-gray-700">Pencarian</label>
-                <input type="text" id="q" name="q" placeholder="Cari email/nama" class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm" value="{{ request('q') }}"/>
-            </div>
-            <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm transition-colors shadow-sm">
-                    Filter
-                </button>
-                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold text-sm transition-colors text-center">Reset</a>
-            </div>
-        </form>
-    </div>
+    <form method="GET" action="{{ route('admin.dashboard') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+        {{-- Pilih Event --}}
+        <div>
+            <label for="event_id" class="block text-xs font-medium text-gray-700">Pilih Event</label>
+            <select id="event_id" name="event_id"
+                    class="form-select mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                <option value="">-- Semua Event --</option>
+                @foreach($events as $event)
+                    <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>
+                        {{ $event->title }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Tanggal Mulai --}}
+        <div>
+            <label for="start_date" class="block text-xs font-medium text-gray-700">Tanggal Mulai</label>
+            <input type="date" id="start_date" name="start_date"
+                   value="{{ request('start_date') }}"
+                   class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
+        </div>
+
+        {{-- Tanggal Selesai --}}
+        <div>
+            <label for="end_date" class="block text-xs font-medium text-gray-700">Tanggal Selesai</label>
+            <input type="date" id="end_date" name="end_date"
+                   value="{{ request('end_date') }}"
+                   class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
+        </div>
+
+        {{-- Status Pembayaran --}}
+        <div>
+            <label for="payment_status" class="block text-xs font-medium text-gray-700">Status Pembayaran</label>
+            <select id="payment_status" name="payment_status"
+                    class="form-select mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                <option value="">-- Semua Status --</option>
+                <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="unpaid" {{ request('payment_status') === 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+            </select>
+        </div>
+
+        {{-- Urutkan Berdasarkan --}}
+        <div>
+            <label for="sort_by" class="block text-xs font-medium text-gray-700">Urutkan Berdasarkan</label>
+            <select id="sort_by" name="sort_by"
+                    class="form-select mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                <option value="">-- Urutkan --</option>
+                <option value="event_title" {{ request('sort_by') === 'event_title' ? 'selected' : '' }}>Judul Acara</option>
+                <option value="email" {{ request('sort_by') === 'email' ? 'selected' : '' }}>Email</option>
+                <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>Nama</option>
+                <option value="payment_status" {{ request('sort_by') === 'payment_status' ? 'selected' : '' }}>Status</option>
+                <option value="checkout_time" {{ request('sort_by') === 'checkout_time' ? 'selected' : '' }}>Waktu Checkout</option>
+            </select>
+        </div>
+
+        {{-- Pencarian --}}
+        <div>
+            <label for="q" class="block text-xs font-medium text-gray-700">Pencarian</label>
+            <input type="text" id="q" name="q" placeholder="Cari email/nama"
+                   value="{{ request('q') }}"
+                   class="form-input mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm"/>
+        </div>
+
+        {{-- Tombol --}}
+        <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm transition-colors shadow-sm">
+                Filter
+            </button>
+            <a href="{{ route('admin.dashboard') }}"
+               class="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold text-sm transition-colors text-center">
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
 
     <div class="flex flex-wrap gap-3 mb-6">
         <a href="{{ route('admin.dashboard.export.excel', request()->query()) }}" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-green-700 transition-colors shadow-sm">Export Excel (XLSX)</a>
@@ -105,6 +131,7 @@
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50 text-left text-gray-600 font-semibold uppercase tracking-wider">
                     <tr>
+                        <th class="px-4 py-3">Judul Acara</th>
                         <th class="px-4 py-3">Email</th>
                         <th class="px-4 py-3">Waktu Checkout</th>
                         <th class="px-4 py-3">Waktu Pembayaran</th>
@@ -118,6 +145,7 @@
                 <tbody class="divide-y divide-gray-100 bg-white">
                     @forelse ($transactions as $transaction)
                         <tr class="hover:bg-gray-50 text-gray-700 transition-colors duration-150">
+                            <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->event->title ?? '-' }}</td>
                             <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->email }}</td>
                             <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->checkout_time }}</td>
                             <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->paid_time ?? '-' }}</td>
@@ -234,4 +262,5 @@
 </script>
 
 </body>
+@endsection
 </html>
