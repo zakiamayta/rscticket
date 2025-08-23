@@ -36,6 +36,7 @@
       <div class="swiper-pagination mt-2"></div>
     </div>
   </div>
+
   <!-- 🔸 CTA: Cara Memesan -->
   <div class="mb-12" data-aos="fade-up" data-aos-duration="900" data-aos-delay="200">
     <a href="{{ url('/cara-memesan') }}" class="block transform transition duration-500 hover:scale-[1.02]">
@@ -45,32 +46,31 @@
     </a>
   </div>
 
-
   <!-- 🔹 UPCOMING SHOWS -->
   <div id="upcoming-events" class="mb-6" data-aos="fade-right" data-aos-duration="800">
-      <h1 class="text-left text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-2">
-        <i class="fa-solid fa-calendar-days text-orange-500"></i>
-        Upcoming Shows
-      </h1>
-      <div class="h-1 w-24 bg-orange-500 mt-2 rounded"></div>
+    <h1 class="text-left text-2xl sm:text-3xl font-extrabold text-gray-900 flex items-center gap-2">
+      <i class="fa-solid fa-calendar-days text-orange-500"></i>
+      Upcoming Shows
+    </h1>
+    <div class="h-1 w-24 bg-orange-500 mt-2 rounded"></div>
   </div>
 
   <!-- Grid Event Card Dinamis -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 justify-items-center">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 justify-items-center">
     @forelse($events as $event)
-      <div class="event-card bg-white rounded-xl shadow-md w-full max-w-sm overflow-hidden transform transition duration-300 hover:shadow-xl hover:-translate-y-1"
-           data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-        <img src="{{ asset('storage/' . $event->poster) }}" alt="{{ $event->title }}" class="w-full aspect-square object-cover">
-        <div class="p-4 sm:p-6">
-          <h2 class="event-title text-lg sm:text-xl font-bold text-gray-900 mb-1">{{ $event->title }}</h2>
-
-          <p class="text-gray-600 mb-1">📍 {{ $event->location }}</p>
-          <p class="text-gray-600 mb-4">🗓️ {{ \Carbon\Carbon::parse($event->date)->translatedFormat('d F Y') }}</p>
-
-          <a href="{{ route('ticket.form', ['event_id' => $event->id]) }}"
-            class="inline-block bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md transition transform hover:scale-105">
-            More Info
-          </a>
+      <div class="event-card bg-white rounded-xl shadow-md w-full max-w-sm flex flex-col overflow-hidden transform transition duration-300 hover:shadow-xl hover:-translate-y-1"
+          data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+        <img src="{{ asset('storage/' . $event->poster) }}" alt="{{ $event->title }}" class="w-full aspect-square object-cover bg-gray-100">
+        <div class="flex flex-col flex-1 p-4 sm:p-6">
+          <h2 class="event-title text-base sm:text-lg font-bold text-gray-900 mb-1">{{ $event->title }}</h2>
+          <p class="text-gray-600 text-sm mb-1">📍 {{ $event->location }}</p>
+          <p class="text-gray-600 text-sm mb-4">🗓️ {{ \Carbon\Carbon::parse($event->date)->translatedFormat('d F Y') }}</p>
+          <div class="mt-auto">
+            <a href="{{ route('ticket.form', ['event_id' => $event->id]) }}"
+              class="inline-block bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white text-sm font-medium py-1.5 px-4 rounded-md shadow-md transition transform hover:scale-105">
+              More Info
+            </a>
+          </div>
         </div>
       </div>
     @empty

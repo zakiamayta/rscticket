@@ -54,10 +54,12 @@ class TicketController extends Controller
                 function ($attribute, $value, $fail) use ($event) {
                     if ($event->max_tickets_per_email == 1) {
                         $exists = DB::table('transactions')
-                            ->join('tickets', 'transactions.id', '=', 'tickets.id')
+                            ->join('ticket_attendees', 'transactions.id', '=', 'ticket_attendees.transaction_id')
+                            ->join('tickets', 'ticket_attendees.ticket_id', '=', 'tickets.id')
                             ->where('tickets.event_id', $event->id)
                             ->where('transactions.email', $value)
                             ->exists();
+
                         if ($exists) {
                             $fail('Email ini sudah digunakan untuk event ini.');
                         }
@@ -108,12 +110,23 @@ class TicketController extends Controller
                 ]);
             }
 
-            // Kalau tiket gratis → langsung commit dan redirect sukses
             if ($hargaTiket == 0) {
+                // Ambil data transaksi dari model
+                $transaction = \App\Models\Transaction::find($transactionId);
+
+                $transaction->payment_status = 'paid';
+                $transaction->status = 'paid';
+                $transaction->paid_time = now();
+                $transaction->save();
+
+                app(\App\Http\Controllers\WebhookController::class)->generateTicketQRCode($transaction);
+                app(\App\Http\Controllers\WebhookController::class)->sendTicketEmail($transaction);
+
                 DB::commit();
                 return redirect()->route('ticket.success', ['id' => $transactionId])
                     ->with('success', 'Pendaftaran berhasil. Tiket telah dikirim.');
             }
+
 
             // Tiket berbayar → proses Xendit
             Xendit::setApiKey(env('XENDIT_API_KEY'));
@@ -127,6 +140,7 @@ class TicketController extends Controller
                 'failure_redirect_url' => route('ticket.failed', ['id' => $transactionId]),
                 'currency' => 'IDR',
                 'invoice_duration' => 15 * 60,
+                'payment_methods' => ['BNI', 'MANDIRI', 'BSI', 'BCA', 'QRIS'],
             ];
 
             $invoice = Invoice::create($params);
@@ -188,6 +202,7 @@ class TicketController extends Controller
             'failure_redirect_url' => route('ticket.failed', ['id' => $transaction->id]),
             'currency' => 'IDR',
             'invoice_duration' => 15 * 60,
+            'payment_methods' => ['BNI', 'MANDIRI', 'BSI', 'BCA', 'QRIS'],
         
         ];
 

@@ -147,7 +147,18 @@
 
     function updateFormFields(qty) {
       const wrapper = document.getElementById('pengunjung-list');
+
+      // 🔹 Simpan data lama sebelum dihapus
+      let oldValues = [];
+      wrapper.querySelectorAll('.pengunjung-entry').forEach((entry, i) => {
+        oldValues[i] = {
+          name: entry.querySelector('input[name="name[]"]').value,
+          phone: entry.querySelector('input[name="phone[]"]').value
+        };
+      });
+
       wrapper.innerHTML = '';
+
       for (let i = 0; i < qty; i++) {
         const div = document.createElement('div');
         div.className = 'border rounded-4 p-3 mb-3 position-relative pengunjung-entry shadow-sm fade-in';
@@ -166,9 +177,17 @@
             <label class="form-label">No. Telepon:</label>
             <input type="text" name="phone[]" class="form-control rounded-pill" placeholder="08xxxxxxxxxx" />
           </div>`;
+
         wrapper.appendChild(div);
+
+        // 🔹 Restore data lama kalau ada
+        if (oldValues[i]) {
+          div.querySelector('input[name="name[]"]').value = oldValues[i].name;
+          div.querySelector('input[name="phone[]"]').value = oldValues[i].phone;
+        }
       }
     }
+
 
     function renderTicketControls(qty) {
       const control = document.getElementById('ticket-control');
@@ -233,11 +252,81 @@
       renderTicketControls(initialQty);
       if (initialQty > 0) updateFormFields(initialQty);
     }
+    document.getElementById('ticket-form')?.addEventListener('submit', function(e) {
+      const phoneInputs = document.querySelectorAll('input[name="phone[]"]');
+      let valid = true;
+      let message = "";
+
+      phoneInputs.forEach((input, i) => {
+        const val = input.value.trim();
+
+        if (!/^[0-9]+$/.test(val)) {
+          valid = false;
+          message = `Nomor telepon pengunjung ${i+1} hanya boleh berisi angka.`;
+        } else if (val.length < 9 || val.length > 15) {
+          valid = false;
+          message = `Nomor telepon pengunjung ${i+1} tidak valid (9–15 digit).`;
+        }
+      });
+
+      if (!valid) {
+        e.preventDefault();
+        showPageAlert(message); // 🔹 pake alert floating
+      }
+    });
   </script>
 
 
 <style>
-  /* 🔹 Alert */
+  /* 🔹 Dark Mode Global */
+  body {
+    background-color: #121212;
+    color: #e5e7eb;
+  }
+
+  .card {
+    background-color: #1f2937 !important; /* abu gelap */
+    color: #f3f4f6;
+  }
+
+  .card-header {
+    background-color: #111827 !important;
+    color: #f97316 !important; /* aksen oranye */
+  }
+
+  .form-control {
+    background-color: #111827 !important;
+    border: 1px solid #374151 !important;
+    color: #f9fafb !important;
+  }
+
+  .form-control:focus {
+    background-color: #1f2937 !important;
+    color: #fff !important;
+    border-color: #f97316 !important;
+    box-shadow: 0 0 0 0.25rem rgba(249,115,22,0.3) !important;
+  }
+
+  .alert-danger {
+    background-color: #dc2626 !important;
+    border: none !important;
+    color: #fff !important;
+  }
+
+  .alert-warning {
+    background-color: #facc15 !important;
+    color: #111 !important;
+    border: none !important;
+  }
+
+  .text-muted, 
+  .text-gray-600, 
+  .text-gray-500, 
+  .text-gray-400 {
+    color: #9ca3af !important; /* abu-abu terang */
+  }
+
+  /* 🔹 Alert Floating */
   #page-alert {
     position: fixed;
     top: -80px;
@@ -253,11 +342,17 @@
     opacity: 1;
   }
 
-  /* 🔹 Animasi masuk/keluar form */
+  /* 🔹 Animasi masuk/keluar form (tetap dipakai) */
   .fade-in { animation: fadeIn 0.3s ease-in-out; }
   .fade-out { animation: fadeOut 0.3s ease-in-out forwards; }
-  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-  @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+  @keyframes fadeIn { 
+    from { opacity: 0; transform: scale(0.95); } 
+    to { opacity: 1; transform: scale(1); } 
+  }
+  @keyframes fadeOut { 
+    from { opacity: 1; transform: scale(1); } 
+    to { opacity: 0; transform: scale(0.95); } 
+  }
 
   /* 🔹 Tombol + dan - */
   .btn-orange-circle {
@@ -300,6 +395,7 @@
     background-color: #dc2626;
     transform: scale(1.1);
   }
+
 </style>
 @endif
 @endsection

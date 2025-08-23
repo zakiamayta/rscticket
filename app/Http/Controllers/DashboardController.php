@@ -12,13 +12,50 @@ use App\Models\Event; // pastikan di atas ada ini
 
 class DashboardController extends Controller
 {
-    public function absensi()
+    public function absensi(Request $request)
     {
-        $attendees = TicketAttendee::with('transaction')->get();
+        $attendees = TicketAttendee::with(['transaction.event'])
+            ->whereHas('transaction', function ($tq) {
+                $tq->where('payment_status', 'paid');
+            })
+            ->when($request->event_id, fn($q) =>
+                $q->whereHas('transaction.event', fn($q2) => $q2->where('id', $request->event_id))
+            )
+            ->when($request->search, function ($q) use ($request) {
+                $search = $request->search;
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('ticket_attendees.name', 'like', "%{$search}%")
+                        ->orWhere('ticket_attendees.phone_number', 'like', "%{$search}%")
+                        ->orWhereHas('transaction', function ($tq) use ($search) {
+                            $tq->where('email', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($request->status, function ($q) use ($request) {
+                if ($request->status === 'sudah') {
+                    // Hanya yang punya transaction dan is_registered = true
+                    $q->whereHas('transaction', fn($tq) => $tq->where('is_registered', true));
+                } elseif ($request->status === 'belum') {
+                    // Termasuk yang tidak punya transaction (atau punya transaksi tapi is_registered = false)
+                    $q->where(function ($sub) {
+                        $sub->whereDoesntHave('transaction')
+                            ->orWhereHas('transaction', fn($tq) => $tq->where('is_registered', false));
+                    });
+                }
+            })
+            ->select('ticket_attendees.*')
+            ->get();
 
-        return view('admin.admin-absensi', compact('attendees'));
+        $events = Event::all();
+
+        return view('admin.admin-absensi', [
+            'attendees' => $attendees,
+            'events' => $events,
+            'search' => $request->search,
+            'status_absen' => $request->status_absen,
+            'event_id' => $request->event_id,
+        ]);
     }
-    
 
     public function index(Request $request)
     {
@@ -90,9 +127,6 @@ class DashboardController extends Controller
 
         return $transactions;
     }
-
-
-
 
     public function exportPDF(Request $request)
     {
