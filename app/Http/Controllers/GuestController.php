@@ -14,11 +14,15 @@ class GuestController extends Controller
         $guest = Transaction::findOrFail($id); // pakai transaction
         return view('admin.guest-qr', compact('guest'));
     }
-
     public function exportGuestQR($id)
     {
-        $guest = Transaction::findOrFail($id);
-        $pdf = Pdf::loadView('admin.export-qr', compact('guest'));
+        $guest = Transaction::with(['event', 'attendees'])->findOrFail($id);
+        $event = $guest->event;
+
+        $pdf = Pdf::loadView('admin.export-qr', compact('guest', 'event'));
         return $pdf->download('guest_qr_' . $guest->id . '.pdf');
     }
+
+
+
 }
