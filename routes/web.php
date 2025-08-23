@@ -87,6 +87,8 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
     Route::get('/guest/qr/{id}', [GuestController::class, 'showQr'])->name('guests.qr');
+    Route::get('/guest/{id}/export-qr', [GuestController::class, 'exportGuestQR'])->name('guest.export.qr');
+
 
     Route::get('/absen/{id}', [AbsensiController::class, 'showPasswordForm'])->name('absen.form');
     Route::post('/absen/{id}', [AbsensiController::class, 'handleScan'])->name('absen.submit');

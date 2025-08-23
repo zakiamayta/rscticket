@@ -58,6 +58,14 @@
         <div class="my-6 p-4 bg-gray-50 rounded-lg border border-gray-200 inline-block">
             <img src="{{ asset('qrcodes/ticket_' . $guest->id . '.png') }}" alt="QR Code" class="mx-auto w-64 h-64 object-contain rounded-md shadow-inner">
         </div>
+        <div class="my-6 p-4 bg-gray-50 rounded-lg border border-gray-200 inline-block">
+            <a href="{{ route('guest.export.qr', $guest->id) }}"
+   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+   Export QR ke PDF
+</a>
+
+        </div>
+        
 
         {{-- URL QR Code --}}
         <p class="text-sm text-gray-500 mb-4">Scan QR code di atas atau kunjungi:</p>
