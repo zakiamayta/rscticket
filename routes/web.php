@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\DashboardController;
@@ -66,6 +67,7 @@ Route::post('/ticket/cancel/{id}', [TicketController::class, 'cancel'])->name('t
 // Status transaksi
 Route::get('/tiket/success/{id}', [TicketController::class, 'success'])->name('ticket.success');
 Route::get('/tiket/failed/{id}', [TicketController::class, 'failed'])->name('ticket.failed');
+Route::get('/tickets/{id}', [WebhookController::class, 'show'])->name('tickets.show');
 
 // Webhook callback (Xendit & QRIS)
 
@@ -76,11 +78,13 @@ Route::get('/tiket/failed/{id}', [TicketController::class, 'failed'])->name('tic
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
+
 Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard/export-excel', [DashboardController::class, 'exportSimpleExcel'])->name('admin.dashboard.export.excel');
     Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportPDF'])->name('admin.dashboard.export.pdf');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
     Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
     Route::get('/guest/qr/{id}', [GuestController::class, 'showQr'])->name('guests.qr');
 

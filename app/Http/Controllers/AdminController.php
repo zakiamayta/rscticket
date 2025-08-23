@@ -3,22 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\TicketAttendee;
 class AdminController extends Controller
 {
-    use App\Models\TicketAttendee;
-
-public function absensi()
-{
-    $attendees = TicketAttendee::with('transaction')
-        ->orderBy('created_at', 'desc')
-        ->get();
-
-    return view('absen.index', compact('attendees'));
-}
-
-
-
-
     public function absenManual($id)
     {
         $attendee = TicketAttendee::find($id);
@@ -27,10 +14,14 @@ public function absensi()
             return redirect()->back()->with('error', 'Peserta tidak ditemukan.');
         }
 
-        // Tandai peserta sudah absen
-        $attendee->is_registered = true;
-        $attendee->registered_at = now();
-        $attendee->save();
+        if (! $attendee->transaction) {
+            return redirect()->back()->with('error', 'Transaksi peserta tidak ditemukan.');
+        }
+
+        // Tandai peserta sudah absen lewat transaksi
+        $attendee->transaction->is_registered = true;
+        $attendee->transaction->registered_at = now();
+        $attendee->transaction->save();
 
         return redirect()->back()->with('success', 'Absensi manual berhasil dilakukan.');
     }
@@ -43,13 +34,16 @@ public function absensi()
             return redirect()->back()->with('error', 'Peserta tidak ditemukan.');
         }
 
-        // Batalkan status absen peserta
-        $attendee->is_registered = false;
-        $attendee->registered_at = null;
-        $attendee->save();
+        if (! $attendee->transaction) {
+            return redirect()->back()->with('error', 'Transaksi peserta tidak ditemukan.');
+        }
+
+        // Batalkan status absen lewat transaksi
+        $attendee->transaction->is_registered = false;
+        $attendee->transaction->registered_at = null;
+        $attendee->transaction->save();
 
         return redirect()->back()->with('success', 'Status absensi berhasil dibatalkan.');
     }
-
 
 }

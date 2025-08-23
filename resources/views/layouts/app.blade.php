@@ -30,6 +30,7 @@
 
   <style>
     body {
+      
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
     }
@@ -38,7 +39,7 @@
   @stack('styles')
 </head>
 
-<body class="text-gray-800">
+<body class="bg-gray-900 text-gray-100 min-h-screen">
   @include('layouts.navbar')
 
   <!-- Konten -->
@@ -47,7 +48,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 text-white pt-8 pb-4 mt-12">
+  <footer class="bg-gray-800 text-white pt-8 pb-4 mt-12">
     <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
       
       <!-- Logo & Deskripsi -->

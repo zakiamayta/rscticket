@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Absensi Berhasil')
 
@@ -8,9 +8,11 @@
     <h2 class="text-2xl font-bold text-green-700 mb-4 text-center">✅ Absensi Berhasil</h2>
 
     <div class="text-gray-800 text-sm mb-4">
-      <p><strong>🆔 ID Transaksi:</strong> {{ $transaction->id }}</p>
-      <p><strong>🎫 Jumlah Tiket:</strong> {{ $details->count() }}</p>
+        <p><strong>📅 Event:</strong> {{ $transaction->event->title ?? '-' }}</p>
+        <p><strong>🆔 ID Transaksi:</strong> {{ $transaction->id }}</p>
+        <p><strong>🎫 Jumlah Tiket:</strong> {{ $details->count() }}</p>
     </div>
+
 
     <div class="mt-4">
       <h3 class="text-md font-semibold mb-2">Daftar Nama & Nomor Telepon:</h3>

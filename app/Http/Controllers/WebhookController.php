@@ -7,56 +7,76 @@ use App\Models\Transaction;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketEmail;
 
 class WebhookController extends Controller
 {
+    // Fungsi reusable untuk generate QR Code
+    public function generateTicketQRCode($transaction)
+    {
+        try {
+            $qrPath = public_path('qrcodes');
+            if (!File::exists($qrPath)) {
+                File::makeDirectory($qrPath, 0755, true);
+            }
+
+            $qrData = route('tickets.show', ['id' => $transaction->id]);
+            $qrFileName = 'ticket_' . $transaction->id . '.png';
+            $qrFullPath = $qrPath . '/' . $qrFileName;
+
+            QrCode::format('png')
+                ->size(300)
+                ->generate($qrData, $qrFullPath);
+
+            $transaction->qr_code = 'qrcodes/' . $qrFileName;
+            $transaction->save();
+
+            Log::info('QR Code generated and saved', [
+                'transaction_id' => $transaction->id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to generate QR Code', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $transaction->id
+            ]);
+        }
+    }
+
+    // Fungsi reusable untuk kirim email tiket
+    public function sendTicketEmail($transaction)
+    {
+        try {
+            Mail::to($transaction->email)->send(new TicketEmail($transaction));
+            Log::info('Ticket email sent successfully', [
+                'transaction_id' => $transaction->id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send ticket email', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $transaction->id
+            ]);
+        }
+    }
+
+    // Handle callback dari Xendit untuk event berbayar
     public function handleCallback(Request $request)
     {
-        // Cek isi request dari webhook
         $data = $request->all();
         Log::info('Xendit Webhook Received:', $data);
 
-        // Proses jika status pembayaran adalah PAID
-        if (isset($data['id']) && $data['status'] === 'PAID') {
+        if (isset($data['id']) && strtoupper($data['status']) === 'PAID') {
             $transaction = Transaction::where('xendit_invoice_id', trim($data['id']))->first();
 
             if ($transaction) {
-                // Update status pembayaran
                 $transaction->payment_status = 'paid';
                 $transaction->status = 'paid';
                 $transaction->paid_time = now();
-
-                try {
-                    // Buat folder qrcodes jika belum ada
-                    $qrPath = public_path('qrcodes');
-                    if (!File::exists($qrPath)) {
-                        File::makeDirectory($qrPath, 0755, true);
-                    }
-
-                    // Data yang akan dikodekan dalam QR
-                    $qrData = route('tickets.show', ['id' => $transaction->id]);
-
-                    // Nama file QR
-                    $qrFileName = 'ticket_' . $transaction->id . '.png';
-                    $qrFullPath = $qrPath . '/' . $qrFileName;
-
-                    // Generate QR
-                    QrCode::format('png')
-                        ->size(300)
-                        ->generate($qrData, $qrFullPath);
-
-                    // Simpan path ke database
-                    $transaction->qr_code = 'qrcodes/' . $qrFileName;
-
-                    Log::info('QR Code generated and saved', ['transaction_id' => $transaction->id]);
-                } catch (\Exception $e) {
-                    Log::error('Failed to generate QR Code', ['error' => $e->getMessage()]);
-                }
-
-                // Simpan semua perubahan
                 $transaction->save();
 
-                Log::info('Transaction updated successfully', ['transaction_id' => $transaction->id]);
+                // Generate QR dan kirim email
+                $this->generateTicketQRCode($transaction);
+                $this->sendTicketEmail($transaction);
 
                 return response()->json(['message' => 'Transaction updated'], 200);
             }
@@ -65,6 +85,26 @@ class WebhookController extends Controller
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
-        return response()->json(['message' => 'Ignored'], 200);
+        return response()->json(['message' => 'Invalid webhook data'], 400);
+    }
+
+    // Proses order event gratis
+    public function processFreeEventOrder(Request $request)
+    {
+        // Simpan transaksi (contoh minimal)
+        $transaction = new Transaction();
+        $transaction->user_id = auth()->id();
+        $transaction->event_id = $request->event_id;
+        $transaction->email = $request->email;
+        $transaction->payment_status = 'paid';
+        $transaction->status = 'paid';
+        $transaction->paid_time = now();
+        $transaction->save();
+
+        // Generate QR dan kirim email
+        $this->generateTicketQRCode($transaction);
+        $this->sendTicketEmail($transaction);
+
+        return response()->json(['message' => 'Free event ticket created', 'transaction' => $transaction]);
     }
 }

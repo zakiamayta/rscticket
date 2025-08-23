@@ -59,10 +59,10 @@
 
         <!-- Tombol Tiket -->
         <div class="text-end">
-          <a href="{{ route('ticket.form', ['event_id' => 1]) }}" 
+          <!-- <a href="{{ route('ticket.form', ['event_id' => 1]) }}" 
              class="inline-block bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105">
             🎟 Beli Tiket
-          </a>
+          </a> -->
         </div>
       </div>
     </div>

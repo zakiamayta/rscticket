@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tiket {{ $eventTitle }}</title>
-    <style>
-        body { font-family: sans-serif; }
-        .ticket { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
-    </style>
+    <meta charset="utf-8">
+    <title>Tiket {{ $event->title }}</title>
 </head>
-<body>
-    <h2>Konser: {{ $eventTitle }}</h2>
-    <p>Tanggal: {{ $eventDate }}</p>
-    <p>Jam: {{ $eventTime }}</p>
-    <hr>
+<body style="font-family: sans-serif; text-align: center;">
+    <h2>{{ $event->title }}</h2>
+    <p>{{ \Carbon\Carbon::parse($event->date)->format('d M Y H:i') }} - {{ $event->location }}</p>
 
-    @foreach ($details as $i => $detail)
-        <div class="ticket">
-            <p><strong>Nama:</strong> {{ $detail['name'] }}</p>
-            <p><strong>ID Pembeli:</strong> {{ $buyerId }}</p>
-            <p><strong>Tiket ke-{{ $i+1 }}</strong></p>
-            <p><strong>Kode:</strong> {{ $detail['barcode'] }}</p>
-            <img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($detail['barcode'], 'C39') }}" alt="Barcode" />
-        </div>
-    @endforeach
+    <p><strong>Email Pemesan:</strong> {{ $transaction->email }}</p>
+    <p><strong>Kode Transaksi:</strong> {{ $transaction->id }}</p>
+
+    @if(isset($qrPath))
+        <img src="{{ $qrPath }}" style="width:200px; margin-top: 20px;">
+    @endif
 </body>
 </html>
