@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\TicketAttendee;
 use App\Models\Event; // pastikan di atas ada ini
 
+
 class DashboardController extends Controller
 {
     public function absensi(Request $request)
@@ -57,18 +58,29 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function index(Request $request)
-    {
-        $transactions = $this->getAllTransactionData($request);
+public function index(Request $request)
+{
+    $transactions = $this->getAllTransactionData($request);
 
-        // Ambil total pembayaran paid
-        $totalPaidAmount = Transaction::where('payment_status', 'paid')->sum('total_amount');
+    // Ambil total pembayaran paid
+    $totalPaidAmount = Transaction::where('payment_status', 'paid')->sum('total_amount');
 
-        // Ambil semua event untuk dropdown
-        $events = Event::orderBy('title', 'asc')->get();
+    // Tambahan: total count paid & unpaid
+    $totalPaidCount = Transaction::where('payment_status', 'paid')->count();
+    $totalUnpaidCount = Transaction::where('payment_status', 'unpaid')->count();
 
-        return view('admin.admin-dashboard', compact('transactions', 'totalPaidAmount', 'events'));
-    }
+    // Ambil semua event untuk dropdown
+    $events = Event::orderBy('title', 'asc')->get();
+
+    return view('admin.admin-dashboard', compact(
+        'transactions',
+        'totalPaidAmount',
+        'events',
+        'totalPaidCount',
+        'totalUnpaidCount'
+    ));
+}
+
 
 
     public function getAllTransactionData(Request $request)
@@ -186,6 +198,49 @@ class DashboardController extends Controller
         }, 'transactions.xlsx');
         
     } 
+
+public function regenerateQR($id)
+{
+    $transaction = Transaction::find($id);
+
+    if (!$transaction) {
+        return back()->with('error', 'Transaksi tidak ditemukan.');
+    }
+
+    try {
+        // Panggil fungsi existing untuk generate QR ulang
+        app(\App\Http\Controllers\WebhookController::class)->generateTicketQRCode($transaction);
+
+        return back()->with('success', 'QR Code untuk transaksi #'.$transaction->id.' berhasil digenerate ulang.');
+    } catch (\Exception $e) {
+        \Log::error('Gagal generate ulang QR: '.$e->getMessage());
+        return back()->with('error', 'Gagal generate ulang QR.');
+    }
+}
+
+
+public function regenerateAllQR()
+{
+    $transactions = Transaction::where('payment_status', 'paid')->get();
+    $success = 0;
+    $failed = 0;
+
+    foreach ($transactions as $transaction) {
+        try {
+            // Gunakan fungsi existing
+            app(\App\Http\Controllers\WebhookController::class)->generateTicketQRCode($transaction);
+            $success++;
+        } catch (\Exception $e) {
+            \Log::error("Gagal regenerate QR untuk transaksi ID {$transaction->id}: " . $e->getMessage());
+            $failed++;
+        }
+    }
+
+    return redirect()
+        ->route('admin.dashboard')
+        ->with('success', "QR Code berhasil diregenerate ulang. Sukses: {$success}, Gagal: {$failed}");
+}
+
 
 
 };
