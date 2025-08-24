@@ -107,7 +107,7 @@
     <div class="ticket">
         {{-- Header --}}
         <div class="ticket-header">
-            <img src="{{ public_path('logo.png') }}" alt="Logo">
+            <img src="{{ public_path('logo.PNG') }}" alt="Logo">
             <h1>{{ $guest->event->title ?? 'Nama Acara' }}</h1>
         </div>
 
@@ -131,8 +131,7 @@
             </div>
 
             <div class="qrcode">
-                <img src="{{ public_path('qrcodes/ticket_' . $guest->id . '.png') }}" 
-                     width="200" height="200" alt="QR Code">
+                <img src="{{ asset('qrcodes/ticket_' . $guest->id . '.png') }}" width="200" height="200" alt="QR Code">
             </div>
 
             <p class="note">

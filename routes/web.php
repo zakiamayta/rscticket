@@ -84,6 +84,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard/export-excel', [DashboardController::class, 'exportSimpleExcel'])->name('admin.dashboard.export.excel');
     Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportPDF'])->name('admin.dashboard.export.pdf');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::post('/admin/transactions/{id}/regenerate-qr', [\App\Http\Controllers\DashboardController::class, 'regenerateQR'])
+    ->name('admin.transactions.regenerateQR');
+
+
     
     Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
     Route::get('/guest/qr/{id}', [GuestController::class, 'showQr'])->name('guests.qr');
