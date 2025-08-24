@@ -21,7 +21,7 @@ class WebhookController extends Controller
                 File::makeDirectory($qrPath, 0755, true);
             }
 
-            $qrData = route('tickets.show', ['id' => $transaction->id]);
+            $qrData = route('absen.form', ['id' => $transaction->id]);
             $qrFileName = 'ticket_' . $transaction->id . '.png';
             $qrFullPath = $qrPath . '/' . $qrFileName;
 
