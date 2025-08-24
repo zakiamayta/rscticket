@@ -7,21 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <style>
-        /* Optional: Custom scrollbar for better aesthetics if content overflows */
+        /* Optional: Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
-
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
-
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
@@ -58,21 +55,24 @@
         <div class="my-6 p-4 bg-gray-50 rounded-lg border border-gray-200 inline-block">
             <img src="{{ asset('qrcodes/ticket_' . $guest->id . '.png') }}" alt="QR Code" class="mx-auto w-64 h-64 object-contain rounded-md shadow-inner">
         </div>
-        <div class="my-6 p-4 bg-gray-50 rounded-lg border border-gray-200 inline-block">
-            <a href="{{ route('guest.export.qr', $guest->id) }}"
-   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
-   Export QR ke PDF
-</a>
 
+        {{-- Tombol Aksi --}}
+        <div class="flex justify-center gap-3 my-6">
+            <a href="{{ route('guest.export.qr', $guest->id) }}"
+               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+               Export QR ke PDF
+            </a>
+            <a href="{{ route('admin.dashboard') }}"
+               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">
+               ← Back ke Dashboard
+            </a>
         </div>
-        
 
         {{-- URL QR Code --}}
         <p class="text-sm text-gray-500 mb-4">Scan QR code di atas atau kunjungi:</p>
         <a href="{{ route('absen.form', ['id' => $guest->id]) }}" class="inline-block bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 break-all">
             {{ route('absen.form', ['id' => $guest->id]) }}
         </a>
-
     </div>
 </main>
 
