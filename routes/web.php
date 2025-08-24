@@ -86,6 +86,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::post('/admin/transactions/{id}/regenerate-qr', [\App\Http\Controllers\DashboardController::class, 'regenerateQR'])
     ->name('admin.transactions.regenerateQR');
+    Route::post('/admin/transactions/regenerate-qr', [\App\Http\Controllers\DashboardController::class, 'regenerateAllQR'])
+    ->name('admin.transactions.regenerate-qr');
+
+
+    
 
 
     

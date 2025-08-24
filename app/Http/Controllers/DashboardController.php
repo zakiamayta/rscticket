@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\TicketAttendee;
 use App\Models\Event; // pastikan di atas ada ini
 
+
 class DashboardController extends Controller
 {
     public function absensi(Request $request)
@@ -217,6 +218,28 @@ public function regenerateQR($id)
     }
 }
 
+
+public function regenerateAllQR()
+{
+    $transactions = Transaction::where('payment_status', 'paid')->get();
+    $success = 0;
+    $failed = 0;
+
+    foreach ($transactions as $transaction) {
+        try {
+            // Gunakan fungsi existing
+            app(\App\Http\Controllers\WebhookController::class)->generateTicketQRCode($transaction);
+            $success++;
+        } catch (\Exception $e) {
+            \Log::error("Gagal regenerate QR untuk transaksi ID {$transaction->id}: " . $e->getMessage());
+            $failed++;
+        }
+    }
+
+    return redirect()
+        ->route('admin.dashboard')
+        ->with('success', "QR Code berhasil diregenerate ulang. Sukses: {$success}, Gagal: {$failed}");
+}
 
 
 

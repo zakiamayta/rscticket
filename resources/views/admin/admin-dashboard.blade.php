@@ -35,43 +35,48 @@
 
 
 <main class="container mx-auto px-6 py-6">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Daftar Transaksi</h2>
+    <h2 class="text-3xl font-extrabold text-gray-900 mb-8">Dashboard Transaksi Admin</h2>
 
     {{-- Ringkasan Paid / Unpaid / Total Uang Masuk --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {{-- Total Uang Masuk --}}
-        <div class="flex items-center justify-between bg-blue-50 border border-blue-200 text-blue-700 rounded-lg p-3 shadow-sm">
+        <div class="flex items-center justify-between bg-white rounded-xl shadow-lg p-5 border border-blue-100 transform hover:scale-105 transition duration-300 ease-in-out">
             <div>
-                <h3 class="text-sm font-medium">Total Uang Masuk</h3>
-                <p class="text-lg font-bold">Rp{{ number_format($totalPaidAmount, 0, ',', '.') }}</p>
+                <h3 class="text-sm font-semibold text-gray-600 mb-1">Total Uang Masuk</h3>
+                <p class="text-2xl font-bold text-blue-800">Rp{{ number_format($totalPaidAmount, 0, ',', '.') }}</p>
             </div>
-            <div class="bg-blue-500 text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">
-                Rp
+            <div class="bg-blue-600 text-white w-12 h-12 flex items-center justify-center rounded-full text-lg shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.592 1L21 12h-3.82c-.403 0-.795.047-1.18.138L13 16.5m-8 2.5a.5.5 0 11-1 0 .5.5 0 011 0zm0 0V9a2 2 0 012-2h4a2 2 0 012 2v7.5m-4-7.5l-4-3m4 3l4 3m-4 3v4.5zm0 0a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                </svg>
             </div>
         </div>
         {{-- Total Paid --}}
-        <div class="flex items-center justify-between bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 shadow-sm">
+        <div class="flex items-center justify-between bg-white rounded-xl shadow-lg p-5 border border-green-100 transform hover:scale-105 transition duration-300 ease-in-out">
             <div>
-                <h3 class="text-sm font-medium">Total Paid</h3>
-                <p class="text-xl font-bold">{{ $totalPaidCount }}</p>
+                <h3 class="text-sm font-semibold text-gray-600 mb-1">Total Pembayaran Berhasil</h3>
+                <p class="text-2xl font-bold text-green-800">{{ $totalPaidCount }}</p>
             </div>
-            <div class="bg-green-500 text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">
-                ✓
+            <div class="bg-green-600 text-white w-12 h-12 flex items-center justify-center rounded-full text-lg shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
         </div>
 
         {{-- Total Unpaid --}}
-        <div class="flex items-center justify-between bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 shadow-sm">
+        <div class="flex items-center justify-between bg-white rounded-xl shadow-lg p-5 border border-red-100 transform hover:scale-105 transition duration-300 ease-in-out">
             <div>
-                <h3 class="text-sm font-medium">Total Unpaid</h3>
-                <p class="text-xl font-bold">{{ $totalUnpaidCount }}</p>
+                <h3 class="text-sm font-semibold text-gray-600 mb-1">Total Belum Dibayar</h3>
+                <p class="text-2xl font-bold text-red-800">{{ $totalUnpaidCount }}</p>
             </div>
-            <div class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">
-                ✕
+            <div class="bg-red-600 text-white w-12 h-12 flex items-center justify-center rounded-full text-lg shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
         </div>
     </div>
-
 
     <div class="bg-white p-5 rounded-xl shadow-md mb-6">
     <form method="GET" action="{{ route('admin.dashboard') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
@@ -156,7 +161,15 @@
     <div class="flex flex-wrap gap-3 mb-6">
         <a href="{{ route('admin.dashboard.export.excel', request()->query()) }}" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-green-700 transition-colors shadow-sm">Export Excel (XLSX)</a>
         <a href="{{ route('admin.dashboard.export.pdf', request()->query()) }}" class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-red-700 transition-colors shadow-sm" target="_blank">Export PDF</a>
-    </div>
+     </div>
+         <form action="{{ route('admin.transactions.regenerate-qr') }}" method="POST"
+          onsubmit="return confirm('Apakah Anda yakin ingin regenerate semua QR Code? Ini akan replace file lama.')">
+        @csrf
+        <button type="submit"
+                class="bg-purple-600 text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-purple-700 transition-colors shadow-sm">
+            Regenerate Semua QR
+        </button>
+    </form>
 
     <div class="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
         <div class="overflow-x-auto">
